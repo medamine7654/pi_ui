@@ -162,6 +162,32 @@ class HomeController extends AbstractController
                 'rating' => 4.4,
                 'reviewCount' => 67,
             ],
+
+
+
+
+
+             [
+                'id' => 6,
+                'hostId' => 2,
+                'title' => 'Seaside House ',
+                'description' => 'Bright house',
+                'category' => 'house',
+                'pricePerNight' => 120,
+                'location' => 'Cascais',
+                'city' => 'Lisbon',
+                'country' => 'Portugal',
+                'images' => [
+                    'https://images.unsplash.com/photo-1580587771525-78b9dba3b914?w=800&h=600&fit=crop',
+                ],
+                'amenities' => ['WiFi', 'Garden', 'Beach access', 'Parking'],
+                'maxGuests' => 5,
+                'bedrooms' => 2,
+                'bathrooms' => 2,
+                'status' => 'active',
+                'rating' => 4.4,
+                'reviewCount' => 67,
+            ],
         ];
 
         // Apply filters
