@@ -1,0 +1,53 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}My Tools{% endblock %}
+
+{% block body %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h1>My Tools</h1>
+    <a href="{{ path('host_tool_new') }}" class="btn btn-primary">Add New Tool</a>
+</div>
+
+<div class="table-responsive">
+    <table class="table table-striped">
+        <thead>
+            <tr>
+                <th>Name</th>
+                <th>Price/Day</th>
+                <th>Stock</th>
+                <th>Location</th>
+                <th>Status</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for tool in tools %}
+                <tr>
+                    <td>{{ tool.name }}</td>
+                    <td>€{{ tool.pricePerDay }}</td>
+                    <td>{{ tool.stockQuantity }}</td>
+                    <td>{{ tool.location }}</td>
+                    <td>
+                        {% if tool.isActive %}
+                            <span class="badge bg-success">Active</span>
+                        {% else %}
+                            <span class="badge bg-warning">Pending</span>
+                        {% endif %}
+                    </td>
+                    <td>
+                        <a href="{{ path('host_tool_edit', {id: tool.id}) }}" class="btn btn-sm btn-warning">Edit</a>
+                        <form method="post" action="{{ path('host_tool_delete', {id: tool.id}) }}" style="display:inline;">
+                            <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ tool.id) }}">
+                            <button type="submit" class="btn btn-sm btn-danger" onclick="return confirm('Are you sure?')">Delete</button>
+                        </form>
+                    </td>
+                </tr>
+            {% else %}
+                <tr>
+                    <td colspan="6" class="text-center">No tools yet. Create your first one!</td>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}

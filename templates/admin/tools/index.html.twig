@@ -1,0 +1,58 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Moderate Tools{% endblock %}
+
+{% block body %}
+<h1>Moderate Tools</h1>
+
+<div class="table-responsive mt-4">
+    <table class="table table-striped">
+        <thead>
+            <tr>
+                <th>Name</th>
+                <th>Host</th>
+                <th>Price/Day</th>
+                <th>Stock</th>
+                <th>Location</th>
+                <th>Status</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for tool in tools %}
+                <tr>
+                    <td>{{ tool.name }}</td>
+                    <td>{{ tool.host.name }}</td>
+                    <td>€{{ tool.pricePerDay }}</td>
+                    <td>{{ tool.stockQuantity }}</td>
+                    <td>{{ tool.location }}</td>
+                    <td>
+                        {% if tool.isActive %}
+                            <span class="badge bg-success">Active</span>
+                        {% else %}
+                            <span class="badge bg-warning">Pending</span>
+                        {% endif %}
+                    </td>
+                    <td>
+                        {% if tool.isActive %}
+                            <form method="post" action="{{ path('admin_tool_hide', {id: tool.id}) }}" style="display:inline;">
+                                <input type="hidden" name="_token" value="{{ csrf_token('hide' ~ tool.id) }}">
+                                <button type="submit" class="btn btn-sm btn-warning">Hide</button>
+                            </form>
+                        {% else %}
+                            <form method="post" action="{{ path('admin_tool_approve', {id: tool.id}) }}" style="display:inline;">
+                                <input type="hidden" name="_token" value="{{ csrf_token('approve' ~ tool.id) }}">
+                                <button type="submit" class="btn btn-sm btn-success">Approve</button>
+                            </form>
+                        {% endif %}
+                    </td>
+                </tr>
+            {% else %}
+                <tr>
+                    <td colspan="7" class="text-center">No tools to moderate.</td>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}

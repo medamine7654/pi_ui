@@ -1,0 +1,91 @@
+<?php
+
+namespace App\Controller\Host;
+
+use App\Entity\Service;
+use App\Form\ServiceType;
+use App\Repository\ServiceRepository;
+use Doctrine\ORM\EntityManagerInterface;
+use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\Routing\Annotation\Route;
+use Symfony\Component\Security\Http\Attribute\IsGranted;
+
+#[Route('/host/services')]
+#[IsGranted('ROLE_HOST')]
+class HostServiceController extends AbstractController
+{
+    #[Route('/', name: 'host_services')]
+    public function index(ServiceRepository $serviceRepository): Response
+    {
+        $services = $serviceRepository->findByHost($this->getUser());
+
+        return $this->render('host/services/index.html.twig', [
+            'services' => $services,
+        ]);
+    }
+
+    #[Route('/new', name: 'host_service_new')]
+    public function new(Request $request, EntityManagerInterface $em): Response
+    {
+        $service = new Service();
+        $form = $this->createForm(ServiceType::class, $service);
+        $form->handleRequest($request);
+
+        if ($form->isSubmitted() && $form->isValid()) {
+            $service->setHost($this->getUser());
+            $service->setIsActive(false);
+
+            $em->persist($service);
+            $em->flush();
+
+            $this->addFlash('success', 'Service created successfully! Waiting for admin approval.');
+            return $this->redirectToRoute('host_services');
+        }
+
+        return $this->render('host/services/new.html.twig', [
+            'form' => $form->createView(),
+        ]);
+    }
+
+    #[Route('/{id}/edit', name: 'host_service_edit')]
+    public function edit(Service $service, Request $request, EntityManagerInterface $em): Response
+    {
+        if ($service->getHost() !== $this->getUser()) {
+            throw $this->createAccessDeniedException();
+        }
+
+        $form = $this->createForm(ServiceType::class, $service);
+        $form->handleRequest($request);
+
+        if ($form->isSubmitted() && $form->isValid()) {
+            $em->flush();
+
+            $this->addFlash('success', 'Service updated successfully!');
+            return $this->redirectToRoute('host_services');
+        }
+
+        return $this->render('host/services/edit.html.twig', [
+            'service' => $service,
+            'form' => $form->createView(),
+        ]);
+    }
+
+    #[Route('/{id}/delete', name: 'host_service_delete', methods: ['POST'])]
+    public function delete(Service $service, Request $request, EntityManagerInterface $em): Response
+    {
+        if ($service->getHost() !== $this->getUser()) {
+            throw $this->createAccessDeniedException();
+        }
+
+        if ($this->isCsrfTokenValid('delete'.$service->getId(), $request->request->get('_token'))) {
+            $em->remove($service);
+            $em->flush();
+
+            $this->addFlash('success', 'Service deleted successfully!');
+        }
+
+        return $this->redirectToRoute('host_services');
+    }
+}

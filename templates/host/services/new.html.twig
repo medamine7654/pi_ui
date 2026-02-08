@@ -1,0 +1,24 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Create Service{% endblock %}
+
+{% block body %}
+<h1>Create New Service</h1>
+
+<div class="row mt-4">
+    <div class="col-md-8">
+        {{ form_start(form) }}
+            {{ form_row(form.name) }}
+            {{ form_row(form.description) }}
+            {{ form_row(form.basePrice) }}
+            {{ form_row(form.durationMinutes) }}
+            {{ form_row(form.location) }}
+            
+            <div class="mt-3">
+                <button type="submit" class="btn btn-primary">Create Service</button>
+                <a href="{{ path('host_services') }}" class="btn btn-secondary">Cancel</a>
+            </div>
+        {{ form_end(form) }}
+    </div>
+</div>
+{% endblock %}

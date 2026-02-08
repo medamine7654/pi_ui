@@ -1,0 +1,43 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Home - Smart Rental Platform{% endblock %}
+
+{% block body %}
+<div class="jumbotron bg-light p-5 rounded">
+    <h1 class="display-4">Welcome to Smart Rental Platform</h1>
+    <p class="lead">Rent tools and book services from your neighbors</p>
+    <hr class="my-4">
+    <p>Browse available tools and services, or become a host and start earning!</p>
+    <div class="mt-4">
+        <a class="btn btn-primary btn-lg me-2" href="{{ path('app_services') }}">Browse Services</a>
+        <a class="btn btn-success btn-lg" href="{{ path('app_tools') }}">Browse Tools</a>
+    </div>
+</div>
+
+<div class="row mt-5">
+    <div class="col-md-4">
+        <div class="card">
+            <div class="card-body">
+                <h5 class="card-title">🔧 Rent Tools</h5>
+                <p class="card-text">Find the perfect tool for your project without buying expensive equipment.</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card">
+            <div class="card-body">
+                <h5 class="card-title">🛠️ Book Services</h5>
+                <p class="card-text">Get professional help from skilled neighbors for your home projects.</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card">
+            <div class="card-body">
+                <h5 class="card-title">💰 Become a Host</h5>
+                <p class="card-text">Share your tools and skills to earn extra income in your community.</p>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
