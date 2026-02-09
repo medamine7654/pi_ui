@@ -1,20 +1,15 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="fr">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="description" content="{% block meta_description %}Discover unique stays, rent tools, and book services. Your all-in-one rental marketplace.{% endblock %}">
-    <meta name="generator" content="Symfony">
-    
-    <title>{% block title %}RentAll - Stays, Tools & Services{% endblock %}</title>
-    
-    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 128 128%22><text y=%221.2em%22 font-size=%2296%22>⚫️</text><text y=%221.3em%22 x=%220.2em%22 font-size=%2276%22 fill=%22%23fff%22>sf</text></svg>">
+    <title>{% block title %}RentAll - Location de logements{% endblock %}</title>
     
     {% block stylesheets %}
         <link rel="stylesheet" href="{{ asset('css/app.css') }}">
     {% endblock %}
 </head>
-<body class="font-sans antialiased">
+<body class="bg-gray-50">
     {% include '_navbar.html.twig' %}
     
     {% for label, messages in app.flashes %}
@@ -27,51 +22,9 @@
         {% endfor %}
     {% endfor %}
     
-    <main class="min-h-screen">
-        {% block body %}{% endblock %}
-    </main>
-    
-    {% block footer %}
-        <footer class="border-t border-gray-200 bg-gray-50 py-8 mt-12">
-            <div class="container mx-auto px-4">
-                <div class="grid grid-cols-1 md:grid-cols-4 gap-8">
-                    <div>
-                        <h3 class="font-bold text-lg mb-4">RentAll</h3>
-                        <p class="text-sm text-gray-600">Your all-in-one rental marketplace for stays, tools, and services.</p>
-                    </div>
-                    <div>
-                        <h4 class="font-semibold mb-3">Explore</h4>
-                        <ul class="space-y-2 text-sm">
-                            <li><a href="{{ path('app_home') }}" class="text-gray-600 hover:text-gray-900">Stays</a></li>
-                            <li><a href="{{ path('app_tools') }}" class="text-gray-600 hover:text-gray-900">Tools</a></li>
-                            <li><a href="{{ path('app_services') }}" class="text-gray-600 hover:text-gray-900">Services</a></li>
-                        </ul>
-                    </div>
-                    <div>
-                        <h4 class="font-semibold mb-3">Support</h4>
-                        <ul class="space-y-2 text-sm">
-                            <li><a href="#" class="text-gray-600 hover:text-gray-900">Help Center</a></li>
-                            <li><a href="#" class="text-gray-600 hover:text-gray-900">Contact Us</a></li>
-                            <li><a href="#" class="text-gray-600 hover:text-gray-900">Safety</a></li>
-                        </ul>
-                    </div>
-                    <div>
-                        <h4 class="font-semibold mb-3">Legal</h4>
-                        <ul class="space-y-2 text-sm">
-                            <li><a href="#" class="text-gray-600 hover:text-gray-900">Terms of Service</a></li>
-                            <li><a href="#" class="text-gray-600 hover:text-gray-900">Privacy Policy</a></li>
-                        </ul>
-                    </div>
-                </div>
-                <div class="mt-8 pt-8 border-t border-gray-200 text-center text-sm text-gray-600">
-                    <p>&copy; {{ "now"|date("Y") }} RentAll. All rights reserved.</p>
-                </div>
-            </div>
-        </footer>
-    {% endblock %}
+    {% block body %}{% endblock %}
     
     {% block javascripts %}
-        {{ importmap('app') }}
     {% endblock %}
 </body>
 </html>
