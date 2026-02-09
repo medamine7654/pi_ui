@@ -1,39 +1,101 @@
 {% extends 'base.html.twig' %}
 
-{% block title %}{{ service.name }}{% endblock %}
+{% block title %}{{ service.name }} - RentAll{% endblock %}
 
 {% block body %}
-<div class="row">
-    <div class="col-md-8">
-        <h1>{{ service.name }}</h1>
-        <p class="lead">{{ service.description }}</p>
-        
-        <div class="card mt-4">
-            <div class="card-body">
-                <h5>Service Details</h5>
-                <table class="table">
-                    <tr>
-                        <th>Price:</th>
-                        <td>€{{ service.basePrice }}</td>
-                    </tr>
-                    <tr>
-                        <th>Duration:</th>
-                        <td>{{ service.durationMinutes }} minutes</td>
-                    </tr>
-                    <tr>
-                        <th>Location:</th>
-                        <td>{{ service.location }}</td>
-                    </tr>
-                    <tr>
-                        <th>Host:</th>
-                        <td>{{ service.host.name }}</td>
-                    </tr>
-                </table>
-            </div>
+<div class="container mx-auto px-4 py-6">
+    <div class="max-w-4xl mx-auto">
+        {# Back button #}
+        <div class="mb-6">
+            <a href="{{ path('app_services') }}" class="inline-flex items-center text-sm text-gray-600 hover:text-gray-900">
+                <svg class="h-4 w-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
+                </svg>
+                Back to Services
+            </a>
         </div>
 
-        <div class="mt-3">
-            <a href="{{ path('app_services') }}" class="btn btn-secondary">Back to Services</a>
+        {# Service details card #}
+        <div class="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
+            <div class="p-8">
+                {# Header #}
+                <div class="flex items-start justify-between mb-6">
+                    <div class="flex-1">
+                        <h1 class="text-3xl font-bold text-gray-900 mb-2">{{ service.name }}</h1>
+                        {% if service.location %}
+                            <p class="text-gray-600 flex items-center">
+                                <svg class="h-5 w-5 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/>
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/>
+                                </svg>
+                                {{ service.location }}
+                            </p>
+                        {% endif %}
+                    </div>
+                    <div class="text-right">
+                        <p class="text-4xl font-bold text-blue-600">€{{ service.basePrice }}</p>
+                        <p class="text-sm text-gray-500">per service</p>
+                    </div>
+                </div>
+
+                {# Description #}
+                {% if service.description %}
+                    <div class="mb-6">
+                        <h2 class="text-lg font-semibold text-gray-900 mb-2">Description</h2>
+                        <p class="text-gray-600 leading-relaxed">{{ service.description }}</p>
+                    </div>
+                {% endif %}
+
+                {# Service details grid #}
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+                    <div class="bg-gray-50 rounded-lg p-4">
+                        <div class="flex items-center mb-2">
+                            <svg class="h-5 w-5 text-gray-400 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                            </svg>
+                            <span class="text-sm font-medium text-gray-500">Duration</span>
+                        </div>
+                        <p class="text-2xl font-bold text-gray-900">{{ service.durationMinutes }}</p>
+                        <p class="text-xs text-gray-500">minutes</p>
+                    </div>
+
+                    <div class="bg-gray-50 rounded-lg p-4">
+                        <div class="flex items-center mb-2">
+                            <svg class="h-5 w-5 text-gray-400 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                            </svg>
+                            <span class="text-sm font-medium text-gray-500">Price</span>
+                        </div>
+                        <p class="text-2xl font-bold text-gray-900">€{{ service.basePrice }}</p>
+                        <p class="text-xs text-gray-500">per service</p>
+                    </div>
+
+                    <div class="bg-gray-50 rounded-lg p-4">
+                        <div class="flex items-center mb-2">
+                            <svg class="h-5 w-5 text-gray-400 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                            </svg>
+                            <span class="text-sm font-medium text-gray-500">Status</span>
+                        </div>
+                        <p class="text-2xl font-bold text-green-600">Available</p>
+                        <p class="text-xs text-gray-500">ready to book</p>
+                    </div>
+                </div>
+
+                {# Host information #}
+                <div class="border-t border-gray-200 pt-6">
+                    <h2 class="text-lg font-semibold text-gray-900 mb-4">Service Provider</h2>
+                    <div class="flex items-center">
+                        <div class="h-12 w-12 rounded-full bg-blue-600 flex items-center justify-center text-white font-bold text-lg">
+                            {{ service.host.name|first|upper }}
+                        </div>
+                        <div class="ml-4">
+                            <p class="font-medium text-gray-900">{{ service.host.name }}</p>
+                            <p class="text-sm text-gray-500">{{ service.host.email }}</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
 </div>

@@ -1,0 +1,38 @@
+{# Sidebar Navigation #}
+{% set current_route = app.request.attributes.get('_route') %}
+
+<!-- Mobile Toggle Button -->
+<button id="mobile-toggle" class="fixed top-4 left-4 z-50 lg:hidden bg-white p-2 rounded-lg shadow-md">
+    <i class="fas fa-bars text-dark"></i>
+</button>
+
+<!-- Mobile Overlay -->
+<div id="mobile-overlay" class="fixed inset-0 bg-black/50 z-40 hidden lg:hidden"></div>
+
+<!-- Sidebar -->
+<aside id="sidebar" class="fixed left-0 top-0 z-40 h-screen bg-white border-r border-gray-200 transition-all duration-300 w-64 -translate-x-full lg:translate-x-0">
+    <!-- Logo Area -->
+    <div class="flex items-center justify-between h-16 px-4 border-b border-gray-200">
+        <div class="flex items-center gap-2">
+            <div class="w-8 h-8 bg-gradient-to-br from-primary to-secondary rounded-lg flex items-center justify-center flex-shrink-0">
+                <i class="fas fa-shield-alt text-white text-sm"></i>
+            </div>
+            <span class="font-bold text-lg text-dark font-heading">RentAdmin</span>
+        </div>
+    </div>
+
+    <!-- Navigation -->
+    <nav class="p-3 space-y-1 overflow-y-auto h-[calc(100vh-4rem)]">
+        <a href="{{ path('admin_services') }}" 
+           class="flex items-center gap-3 px-3 py-2.5 rounded-lg transition-all duration-200 {% if current_route == 'admin_services' %}bg-primary text-white{% else %}text-dark hover:bg-gray-100{% endif %}">
+            <i class="fas fa-briefcase w-5 text-center"></i>
+            <span class="flex-1 text-sm font-medium">Services</span>
+        </a>
+        
+        <a href="{{ path('admin_tools') }}" 
+           class="flex items-center gap-3 px-3 py-2.5 rounded-lg transition-all duration-200 {% if current_route == 'admin_tools' %}bg-primary text-white{% else %}text-dark hover:bg-gray-100{% endif %}">
+            <i class="fas fa-wrench w-5 text-center"></i>
+            <span class="flex-1 text-sm font-medium">Matériel</span>
+        </a>
+    </nav>
+</aside>
