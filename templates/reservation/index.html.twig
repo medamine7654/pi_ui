@@ -1,124 +1,110 @@
 {% extends 'base.html.twig' %}
 
-{% block title %}My Reservations - RentAll{% endblock %}
+{% block title %}Mes Réservations - RentAll{% endblock %}
 
 {% block body %}
-<div class="container mx-auto px-4 py-8">
-    <h1 class="text-3xl font-bold text-gray-900 mb-8">My Reservations</h1>
+<div class="min-h-screen bg-gray-50 py-8">
+    <div class="container mx-auto px-4">
+        <h1 class="text-4xl font-bold text-gray-900 mb-8">Mes Réservations</h1>
 
-    {% if reservations|length > 0 %}
-        {# Tabs for filtering reservations #}
-        <div class="mb-6 border-b border-gray-200">
-            <nav class="-mb-px flex space-x-8">
-                <a 
-                    href="{{ path('app_reservations') }}"
-                    class="{% if not status or status == 'all' %}border-blue-600 text-blue-600{% else %}border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300{% endif %} whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm"
-                >
-                    All
-                </a>
-                <a 
-                    href="{{ path('app_reservations', {status: 'confirmed'}) }}"
-                    class="{% if status == 'confirmed' %}border-blue-600 text-blue-600{% else %}border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300{% endif %} whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm"
-                >
-                    Upcoming
-                </a>
-                <a 
-                    href="{{ path('app_reservations', {status: 'completed'}) }}"
-                    class="{% if status == 'completed' %}border-blue-600 text-blue-600{% else %}border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300{% endif %} whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm"
-                >
-                    Past
-                </a>
-                <a 
-                    href="{{ path('app_reservations', {status: 'cancelled'}) }}"
-                    class="{% if status == 'cancelled' %}border-blue-600 text-blue-600{% else %}border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300{% endif %} whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm"
-                >
-                    Cancelled
-                </a>
-            </nav>
-        </div>
-
-        {# Reservations list #}
-        <div class="space-y-4">
-            {% for reservation in reservations %}
-                {% set item = reservation.type == 'logement' ? logements[reservation.itemId] : tools[reservation.itemId] %}
-                {% set host = hosts[reservation.hostId] %}
+        {% if reservations|length > 0 %}
+            {# Reservations list #}
+            <div class="space-y-6">
+                {% for reservation in reservations %}
                 
-                <div class="rounded-lg border border-gray-200 bg-white shadow-sm hover:shadow-md transition-shadow">
+                <div class="bg-white rounded-xl shadow-lg overflow-hidden hover:shadow-xl transition-shadow">
                     <div class="p-6">
                         <div class="flex gap-6">
-                            {# Item image #}
+                            {# Logement image #}
                             <div class="flex-shrink-0">
-                                <img 
-                                    src="{{ item.images[0] ?? asset('placeholder.svg') }}" 
-                                    alt="{{ item.title ?? item.name }}"
-                                    class="h-32 w-32 rounded-lg object-cover"
-                                >
+                                {% if reservation.logement.image %}
+                                    <img src="{{ reservation.logement.image }}" 
+                                         alt="{{ reservation.logement.titre }}"
+                                         class="h-32 w-48 rounded-lg object-cover">
+                                {% else %}
+                                    <div class="h-32 w-48 bg-gradient-to-br from-blue-400 to-blue-600 rounded-lg flex items-center justify-center">
+                                        <svg class="w-12 h-12 text-white opacity-80" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"></path>
+                                        </svg>
+                                    </div>
+                                {% endif %}
                             </div>
 
                             {# Reservation details #}
                             <div class="flex-1 min-w-0">
-                                <div class="flex items-start justify-between">
+                                <div class="flex items-start justify-between mb-4">
                                     <div class="flex-1">
-                                        <h3 class="text-lg font-semibold text-gray-900">
-                                            {{ item.title ?? item.name }}
+                                        <h3 class="text-xl font-bold text-gray-900 mb-2">
+                                            {{ reservation.logement.titre }}
                                         </h3>
-                                        <p class="text-sm text-gray-500 mt-1">
-                                            {% if reservation.type == 'logement' %}
-                                                {{ item.location }} • {{ item.category|capitalize }}
-                                            {% else %}
-                                                {{ item.category|replace({'-': ' '})|title }}
-                                            {% endif %}
+                                        <p class="text-sm text-gray-600 mb-1">
+                                            <svg class="w-4 h-4 inline mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path>
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                                            </svg>
+                                            {{ reservation.logement.adresse }}
                                         </p>
-                                        <p class="text-sm text-gray-500">
-                                            Hosted by {{ host ? host.name : 'Unknown' }}
+                                        <p class="text-sm text-gray-600">
+                                            Hébergé par {{ reservation.logement.proprietaire.prenom }} {{ reservation.logement.proprietaire.nom }}
                                         </p>
                                     </div>
                                     
                                     {# Status badge #}
-                                    {% import 'components/ui_macros.html.twig' as ui %}
                                     <div>
-                                        {% if reservation.status == 'confirmed' %}
-                                            {{ ui.badge('Confirmed', 'success') }}
-                                        {% elseif reservation.status == 'completed' %}
-                                            {{ ui.badge('Completed', 'default') }}
-                                        {% elseif reservation.status == 'cancelled' %}
-                                            {{ ui.badge('Cancelled', 'danger') }}
+                                        {% if reservation.statut == 'confirmee' %}
+                                            <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-semibold bg-green-100 text-green-800">
+                                                Confirmée
+                                            </span>
+                                        {% elseif reservation.statut == 'terminee' %}
+                                            <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-semibold bg-gray-100 text-gray-800">
+                                                Terminée
+                                            </span>
+                                        {% elseif reservation.statut == 'annulee' %}
+                                            <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-semibold bg-red-100 text-red-800">
+                                                Annulée
+                                            </span>
+                                        {% else %}
+                                            <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-semibold bg-yellow-100 text-yellow-800">
+                                                {{ reservation.statut|capitalize }}
+                                            </span>
                                         {% endif %}
                                     </div>
                                 </div>
 
                                 {# Dates and price #}
-                                <div class="mt-4 grid grid-cols-1 sm:grid-cols-3 gap-4">
+                                <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-4">
                                     <div>
-                                        <p class="text-xs text-gray-500">Check-in</p>
-                                        <p class="text-sm font-medium text-gray-900">{{ reservation.startDate|date('M d, Y') }}</p>
+                                        <p class="text-xs text-gray-500 mb-1">Arrivée</p>
+                                        <p class="text-sm font-semibold text-gray-900">{{ reservation.dateDebut|date('d/m/Y') }}</p>
                                     </div>
                                     <div>
-                                        <p class="text-xs text-gray-500">Check-out</p>
-                                        <p class="text-sm font-medium text-gray-900">{{ reservation.endDate|date('M d, Y') }}</p>
+                                        <p class="text-xs text-gray-500 mb-1">Départ</p>
+                                        <p class="text-sm font-semibold text-gray-900">{{ reservation.dateFin|date('d/m/Y') }}</p>
                                     </div>
                                     <div>
-                                        <p class="text-xs text-gray-500">Total Price</p>
-                                        <p class="text-sm font-medium text-gray-900">${{ reservation.totalPrice }}</p>
+                                        <p class="text-xs text-gray-500 mb-1">Prix total</p>
+                                        <p class="text-sm font-semibold text-gray-900">{{ reservation.montantTotal }}€</p>
                                     </div>
                                 </div>
 
                                 {# Actions #}
-                                <div class="mt-4 flex gap-3">
-                                    <a 
-                                        href="{{ path(reservation.type == 'logement' ? 'app_home' : 'app_tool_show', {id: reservation.itemId}) }}"
-                                        class="text-sm font-medium text-blue-600 hover:text-blue-700"
-                                    >
-                                        View Details
+                                <div class="flex gap-3 pt-4 border-t border-gray-200">
+                                    <a href="{{ path('app_reservation_show', {id: reservation.id}) }}"
+                                       class="text-sm font-semibold text-blue-600 hover:text-blue-700">
+                                        Voir les détails
                                     </a>
-                                    {% if reservation.status == 'confirmed' %}
-                                        <a 
-                                            href="{{ path('app_reservation_cancel', {id: reservation.id}) }}"
-                                            class="text-sm font-medium text-red-600 hover:text-red-700"
-                                            onclick="return confirm('Are you sure you want to cancel this reservation?')"
-                                        >
-                                            Cancel Reservation
-                                        </a>
+                                    <a href="{{ path('app_logement_show', {id: reservation.logement.id}) }}"
+                                       class="text-sm font-semibold text-blue-600 hover:text-blue-700">
+                                        Voir le logement
+                                    </a>
+                                    {% if reservation.statut == 'confirmee' and reservation.peutEtreAnnulee %}
+                                        <form method="post" action="{{ path('app_reservation_cancel', {id: reservation.id}) }}" 
+                                              onsubmit="return confirm('Êtes-vous sûr de vouloir annuler cette réservation ?');"
+                                              class="inline">
+                                            <button type="submit" class="text-sm font-semibold text-red-600 hover:text-red-700">
+                                                Annuler la réservation
+                                            </button>
+                                        </form>
                                     {% endif %}
                                 </div>
                             </div>
@@ -129,25 +115,24 @@
         </div>
     {% else %}
         {# Empty state #}
-        <div class="flex flex-col items-center justify-center py-12 text-center">
-            <div class="rounded-full bg-gray-100 p-6">
-                <svg class="h-12 w-12 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/>
-                </svg>
-            </div>
-            <h3 class="mt-4 text-lg font-medium text-gray-900">No reservations yet</h3>
-            <p class="mt-1 text-gray-600">
-                Start exploring and book your first stay or tool rental
-            </p>
-            <div class="mt-6">
-                <a 
-                    href="{{ path('app_home') }}"
-                    class="inline-flex items-center px-4 py-2 rounded-md bg-blue-600 text-white hover:bg-blue-700 font-medium text-sm"
-                >
-                    Explore Stays
+        <div class="bg-white rounded-xl shadow-lg p-12">
+            <div class="flex flex-col items-center justify-center text-center">
+                <div class="rounded-full bg-gray-100 p-8 mb-6">
+                    <svg class="h-16 w-16 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/>
+                    </svg>
+                </div>
+                <h3 class="text-2xl font-bold text-gray-900 mb-2">Aucune réservation</h3>
+                <p class="text-gray-600 mb-6">
+                    Vous n'avez pas encore de réservation. Commencez à explorer nos logements !
+                </p>
+                <a href="{{ path('app_home') }}"
+                   class="inline-flex items-center px-6 py-3 rounded-lg bg-blue-600 text-white hover:bg-blue-700 font-semibold text-lg shadow-lg">
+                    Explorer les logements
                 </a>
             </div>
         </div>
     {% endif %}
+    </div>
 </div>
 {% endblock %}
