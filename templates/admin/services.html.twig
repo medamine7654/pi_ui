@@ -1,0 +1,82 @@
+{% extends 'admin/base.html.twig' %}
+
+{% block title %}Services - Admin{% endblock %}
+{% block search_placeholder %}Rechercher un service...{% endblock %}
+
+{% block body %}
+<div class="mb-6 flex items-center justify-between">
+    <div>
+        <h1 class="text-2xl font-bold text-dark font-heading">Services</h1>
+        <p class="text-gray-500 mt-1">Liste, recherche, tri, export, edition et suppression.</p>
+    </div>
+    <div class="flex items-center gap-2">
+        <a href="{{ path('admin_services_stats') }}" class="px-3 py-2 rounded-lg border border-gray-200 bg-white text-sm hover:bg-gray-50">Statistiques</a>
+        <a href="{{ path('admin_services_export', {search: filters.search, sort: filters.sort}) }}" class="px-3 py-2 rounded-lg bg-secondary text-white text-sm hover:opacity-90">Exporter CSV</a>
+    </div>
+</div>
+
+{% for message in app.flashes('success') %}
+    <div class="mb-3 rounded-lg border border-green-200 bg-green-50 px-4 py-2 text-sm text-green-700">{{ message }}</div>
+{% endfor %}
+{% for message in app.flashes('error') %}
+    <div class="mb-3 rounded-lg border border-red-200 bg-red-50 px-4 py-2 text-sm text-red-700">{{ message }}</div>
+{% endfor %}
+
+<div class="grid grid-cols-1 sm:grid-cols-4 gap-4 mb-6">
+    <div class="bg-white rounded-xl p-4 shadow-sm"><p class="text-sm text-gray-500">Total</p><p class="text-2xl font-bold">{{ stats.total }}</p></div>
+    <div class="bg-white rounded-xl p-4 shadow-sm"><p class="text-sm text-gray-500">Aujourd'hui</p><p class="text-2xl font-bold">{{ stats.today }}</p></div>
+    <div class="bg-white rounded-xl p-4 shadow-sm"><p class="text-sm text-gray-500">A venir</p><p class="text-2xl font-bold">{{ stats.upcoming }}</p></div>
+    <div class="bg-white rounded-xl p-4 shadow-sm"><p class="text-sm text-gray-500">Passes</p><p class="text-2xl font-bold">{{ stats.past }}</p></div>
+</div>
+
+<div class="bg-white rounded-xl shadow-sm p-4 mb-4">
+    <form method="get" class="flex flex-col md:flex-row gap-3">
+        <input type="text" name="search" value="{{ filters.search }}" placeholder="Titre, description, proprietaire..." class="flex-1 bg-gray-50 border border-gray-200 rounded-lg px-3 py-2 text-sm">
+        <select name="sort" class="bg-gray-50 border border-gray-200 rounded-lg px-3 py-2 text-sm">
+            <option value="date_desc" {% if filters.sort == 'date_desc' %}selected{% endif %}>Date (recent -> ancien)</option>
+            <option value="date_asc" {% if filters.sort == 'date_asc' %}selected{% endif %}>Date (ancien -> recent)</option>
+            <option value="title_asc" {% if filters.sort == 'title_asc' %}selected{% endif %}>Titre A-Z</option>
+            <option value="title_desc" {% if filters.sort == 'title_desc' %}selected{% endif %}>Titre Z-A</option>
+            <option value="owner" {% if filters.sort == 'owner' %}selected{% endif %}>Proprietaire</option>
+        </select>
+        <button class="px-4 py-2 rounded-lg bg-primary text-white text-sm">Filtrer</button>
+    </form>
+</div>
+
+<div class="bg-white rounded-xl shadow-sm overflow-x-auto">
+    <table class="w-full">
+        <thead class="bg-gray-50 border-b border-gray-200">
+            <tr>
+                <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">ID</th>
+                <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Titre</th>
+                <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Description</th>
+                <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Date</th>
+                <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Proprietaire</th>
+                <th class="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase">Actions</th>
+            </tr>
+        </thead>
+        <tbody class="divide-y divide-gray-200">
+        {% for service in services %}
+            <tr class="hover:bg-gray-50">
+                <td class="px-4 py-3 text-sm">{{ service.id }}</td>
+                <td class="px-4 py-3 text-sm font-medium">{{ service.titre }}</td>
+                <td class="px-4 py-3 text-sm text-gray-600">{{ service.description ? (service.description|slice(0, 70) ~ (service.description|length > 70 ? '...' : '')) : '' }}</td>
+                <td class="px-4 py-3 text-sm">{{ service.dateService ? service.dateService|date('d/m/Y H:i') : '-' }}</td>
+                <td class="px-4 py-3 text-sm">{{ service.user ? service.user.email : '-' }}</td>
+                <td class="px-4 py-3">
+                    <div class="flex justify-end items-center gap-2">
+                        <a href="{{ path('admin_service_edit', {id: service.id}) }}" class="px-2 py-1 text-xs rounded border border-gray-200 hover:bg-gray-50">Modifier</a>
+                        <form method="post" action="{{ path('admin_service_delete', {id: service.id}) }}" onsubmit="return confirm('Supprimer ce service ?');">
+                            <input type="hidden" name="_token" value="{{ csrf_token('delete-service' ~ service.id) }}">
+                            <button class="px-2 py-1 text-xs rounded bg-red-600 text-white hover:bg-red-700">Supprimer</button>
+                        </form>
+                    </div>
+                </td>
+            </tr>
+        {% else %}
+            <tr><td colspan="6" class="px-4 py-8 text-center text-gray-500">Aucun service.</td></tr>
+        {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}

@@ -1,0 +1,91 @@
+{% extends 'front/base.html.twig' %}
+
+{% block title %}Rent Tools - RentAll{% endblock %}
+
+{% block body %}
+<div class="container mx-auto px-4 py-6">
+    <section class="mb-6">
+        <h1 class="text-3xl font-bold tracking-tight text-gray-900 sm:text-4xl">Materiel</h1>
+        <p class="mt-2 text-gray-600">Ajouter du materiel et le rechercher.</p>
+    </section>
+
+    {% for message in app.flashes('success') %}
+        <div class="mb-4 rounded-md border border-green-200 bg-green-50 px-4 py-3 text-sm text-green-700">{{ message }}</div>
+    {% endfor %}
+    {% for message in app.flashes('error') %}
+        <div class="mb-4 rounded-md border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">{{ message }}</div>
+    {% endfor %}
+
+    <section class="mb-8 rounded-lg border border-gray-200 bg-white p-6 shadow-sm">
+        <h2 class="mb-4 text-lg font-semibold text-gray-900">Ajouter un materiel</h2>
+        <form method="post" action="{{ path('app_tool_create') }}" class="grid grid-cols-1 gap-4 md:grid-cols-2">
+            <input type="hidden" name="_token" value="{{ csrf_token('create_tool') }}">
+            <div>
+                <label for="nom" class="mb-1 block text-sm font-medium text-gray-700">Nom</label>
+                <input id="nom" name="nom" required class="w-full rounded-md border border-gray-300 px-3 py-2 text-sm" />
+            </div>
+            <div>
+                <label for="etat" class="mb-1 block text-sm font-medium text-gray-700">Etat</label>
+                <input id="etat" name="etat" class="w-full rounded-md border border-gray-300 px-3 py-2 text-sm" placeholder="neuf, bon, use..." />
+            </div>
+            <div class="md:col-span-2">
+                <label class="inline-flex items-center gap-2">
+                    <input type="checkbox" name="disponible" value="1" checked class="rounded border-gray-300" />
+                    <span class="text-sm text-gray-700">Disponible</span>
+                </label>
+            </div>
+            <div class="md:col-span-2">
+                <button class="rounded-md bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700">Ajouter</button>
+            </div>
+        </form>
+    </section>
+
+    <section class="mb-6">
+        <form method="get" action="{{ path('app_tools') }}" class="flex flex-wrap items-center gap-3">
+            <input
+                type="text"
+                name="q"
+                value="{{ filters.q }}"
+                placeholder="Rechercher par nom ou etat..."
+                class="min-w-[240px] flex-1 rounded-md border border-gray-300 px-3 py-2 text-sm"
+            />
+            <label class="inline-flex items-center gap-2 text-sm text-gray-700">
+                <input type="checkbox" name="available" value="1" {% if filters.available %}checked{% endif %} class="rounded border-gray-300" />
+                Disponible uniquement
+            </label>
+            <button class="rounded-md border border-gray-300 bg-white px-4 py-2 text-sm font-medium hover:bg-gray-50">Rechercher</button>
+        </form>
+    </section>
+
+    <section>
+        <div class="mb-4 text-sm text-gray-600">
+            {{ tools|length }} {{ tools|length == 1 ? 'materiel' : 'materiels' }} trouve(s)
+        </div>
+        {% if tools|length > 0 %}
+            <div class="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
+                {% for tool in tools %}
+                    <div class="rounded-lg border border-gray-200 bg-white p-5 shadow-sm">
+                        <h3 class="text-lg font-semibold text-gray-900">{{ tool.nom }}</h3>
+                        <p class="mt-1 text-sm text-gray-600">Etat: {{ tool.etat ?: 'non renseigne' }}</p>
+                        <p class="mt-2 text-xs {{ tool.disponible ? 'text-green-600' : 'text-red-600' }}">
+                            {{ tool.disponible ? 'Disponible' : 'Indisponible' }}
+                        </p>
+                        {% if tool.disponible %}
+                            <form method="post" action="{{ path('app_tool_book', {id: tool.id}) }}" class="mt-4 grid grid-cols-1 gap-2">
+                                <input type="hidden" name="_token" value="{{ csrf_token('book_tool_' ~ tool.id) }}">
+                                <input type="date" name="start_date" required class="rounded-md border border-gray-300 px-2 py-1 text-sm">
+                                <input type="date" name="end_date" required class="rounded-md border border-gray-300 px-2 py-1 text-sm">
+                                <button class="rounded-md bg-blue-600 px-3 py-2 text-sm font-medium text-white hover:bg-blue-700">Reserver</button>
+                            </form>
+                        {% endif %}
+                    </div>
+                {% endfor %}
+            </div>
+        {% else %}
+            <div class="flex flex-col items-center justify-center py-12 text-center">
+                <h3 class="mt-4 text-lg font-medium text-gray-900">Aucun materiel trouve</h3>
+            </div>
+        {% endif %}
+    </section>
+</div>
+{% endblock %}

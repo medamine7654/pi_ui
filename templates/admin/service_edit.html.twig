@@ -1,0 +1,29 @@
+{% extends 'admin/base.html.twig' %}
+{% block title %}Modifier Service - Admin{% endblock %}
+{% block body %}
+<div class="mb-6 flex items-center justify-between">
+  <h1 class="text-2xl font-bold text-dark font-heading">Modifier service #{{ service.id }}</h1>
+  <a href="{{ path('admin_services') }}" class="px-3 py-2 rounded-lg border border-gray-200 bg-white text-sm hover:bg-gray-50">Retour</a>
+</div>
+{% for message in app.flashes('error') %}
+  <div class="mb-3 rounded-lg border border-red-200 bg-red-50 px-4 py-2 text-sm text-red-700">{{ message }}</div>
+{% endfor %}
+<div class="bg-white rounded-xl p-6 shadow-sm max-w-2xl">
+  <form method="post" class="space-y-4">
+    <input type="hidden" name="_token" value="{{ csrf_token('edit-service' ~ service.id) }}">
+    <div>
+      <label class="block text-sm font-medium text-gray-700 mb-1">Titre</label>
+      <input name="titre" value="{{ service.titre }}" required class="w-full rounded-lg border border-gray-200 bg-gray-50 px-3 py-2 text-sm">
+    </div>
+    <div>
+      <label class="block text-sm font-medium text-gray-700 mb-1">Date</label>
+      <input type="datetime-local" name="date_service" value="{{ service.dateService ? service.dateService|date('Y-m-d\\TH:i') : '' }}" required class="w-full rounded-lg border border-gray-200 bg-gray-50 px-3 py-2 text-sm">
+    </div>
+    <div>
+      <label class="block text-sm font-medium text-gray-700 mb-1">Description</label>
+      <textarea name="description" rows="4" class="w-full rounded-lg border border-gray-200 bg-gray-50 px-3 py-2 text-sm">{{ service.description }}</textarea>
+    </div>
+    <button class="px-4 py-2 rounded-lg bg-primary text-white text-sm">Enregistrer</button>
+  </form>
+</div>
+{% endblock %}
