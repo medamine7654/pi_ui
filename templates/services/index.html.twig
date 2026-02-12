@@ -26,6 +26,16 @@
                 {% for service in services %}
                     <div class="rounded-lg border border-gray-200 bg-white shadow-sm hover:shadow-md transition-shadow">
                         <div class="p-6 space-y-4">
+                            {# Category badge #}
+                            {% if service.category %}
+                                <div class="mb-2">
+                                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+                                        <i class="{{ service.category.icon }} mr-1"></i>
+                                        {{ service.category.name }}
+                                    </span>
+                                </div>
+                            {% endif %}
+                            
                             {# Service header #}
                             <div class="flex items-start justify-between">
                                 <div class="flex-1">

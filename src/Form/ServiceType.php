@@ -2,7 +2,10 @@
 
 namespace App\Form;
 
+use App\Entity\Category;
 use App\Entity\Service;
+use App\Repository\CategoryRepository;
+use Symfony\Bridge\Doctrine\Form\Type\EntityType;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\Extension\Core\Type\IntegerType;
 use Symfony\Component\Form\Extension\Core\Type\NumberType;
@@ -29,6 +32,22 @@ class ServiceType extends AbstractType
                 'label' => 'Description',
                 'required' => false,
                 'attr' => ['class' => 'form-control', 'rows' => 4]
+            ])
+            ->add('category', EntityType::class, [
+                'class' => Category::class,
+                'choice_label' => 'name',
+                'placeholder' => 'Select a category',
+                'required' => true,
+                'query_builder' => function (CategoryRepository $repository) {
+                    return $repository->createQueryBuilder('c')
+                        ->where('c.type = :type')
+                        ->setParameter('type', 'service')
+                        ->orderBy('c.name', 'ASC');
+                },
+                'attr' => ['class' => 'form-control'],
+                'constraints' => [
+                    new NotBlank(message: 'Please select a category'),
+                ],
             ])
             ->add('basePrice', NumberType::class, [
                 'label' => 'Price (€)',
