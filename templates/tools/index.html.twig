@@ -85,6 +85,17 @@
             <div class="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
                 {% for tool in tools %}
                     <div class="rounded-lg border border-gray-200 bg-white shadow-sm hover:shadow-md transition-shadow">
+                        {# Tool Image #}
+                        {% if tool.imageName %}
+                            <img src="{{ asset('uploads/tools/' ~ tool.imageName) }}" 
+                                 alt="{{ tool.name }}" 
+                                 class="w-full h-48 object-cover rounded-t-lg">
+                        {% else %}
+                            <div class="w-full h-48 bg-gradient-to-br from-purple-100 to-purple-200 rounded-t-lg flex items-center justify-center">
+                                <i class="fa-solid fa-wrench text-purple-400 text-5xl"></i>
+                            </div>
+                        {% endif %}
+                        
                         <div class="p-6 space-y-4">
                             {# Category badge #}
                             {% if tool.category %}

@@ -15,6 +15,7 @@ use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
 use Symfony\Component\Validator\Constraints\NotBlank;
 use Symfony\Component\Validator\Constraints\Positive;
+use Vich\UploaderBundle\Form\Type\VichImageType;
 
 class ServiceType extends AbstractType
 {
@@ -68,6 +69,16 @@ class ServiceType extends AbstractType
             ->add('location', TextType::class, [
                 'label' => 'Location',
                 'required' => false,
+                'attr' => ['class' => 'form-control']
+            ])
+            ->add('imageFile', VichImageType::class, [
+                'required' => false,
+                'allow_delete' => true,
+                'delete_label' => 'Remove image',
+                'download_uri' => false,
+                'image_uri' => false,
+                'label' => 'Service Image',
+                'help' => 'Max 5MB. Formats: JPG, PNG, GIF',
                 'attr' => ['class' => 'form-control']
             ])
         ;

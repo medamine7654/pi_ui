@@ -5,9 +5,13 @@ namespace App\Entity;
 use App\Repository\ServiceRepository;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Component\HttpFoundation\File\File;
+use Symfony\Component\Validator\Constraints as Assert;
+use Vich\UploaderBundle\Mapping\Annotation as Vich;
 
 #[ORM\Entity(repositoryClass: ServiceRepository::class)]
 #[ORM\HasLifecycleCallbacks]
+#[Vich\Uploadable]
 class Service
 {
     #[ORM\Id]
@@ -46,6 +50,23 @@ class Service
     #[ORM\ManyToOne(targetEntity: Category::class, inversedBy: 'services')]
     #[ORM\JoinColumn(nullable: true)]
     private ?Category $category = null;
+
+    #[Vich\UploadableField(mapping: 'service_images', fileNameProperty: 'imageName', size: 'imageSize')]
+    #[Assert\File(
+        maxSize: '5M',
+        mimeTypes: ['image/jpeg', 'image/png', 'image/gif'],
+        mimeTypesMessage: 'Please upload a valid image (JPG, PNG, or GIF)'
+    )]
+    private ?File $imageFile = null;
+
+    #[ORM\Column(length: 255, nullable: true)]
+    private ?string $imageName = null;
+
+    #[ORM\Column(nullable: true)]
+    private ?int $imageSize = null;
+
+    #[ORM\Column(nullable: true)]
+    private ?\DateTimeImmutable $imageUpdatedAt = null;
 
     public function __construct()
     {
@@ -160,5 +181,49 @@ class Service
     {
         $this->category = $category;
         return $this;
+    }
+
+    public function setImageFile(?File $imageFile = null): void
+    {
+        $this->imageFile = $imageFile;
+
+        if (null !== $imageFile) {
+            $this->imageUpdatedAt = new \DateTimeImmutable();
+        }
+    }
+
+    public function getImageFile(): ?File
+    {
+        return $this->imageFile;
+    }
+
+    public function setImageName(?string $imageName): void
+    {
+        $this->imageName = $imageName;
+    }
+
+    public function getImageName(): ?string
+    {
+        return $this->imageName;
+    }
+
+    public function setImageSize(?int $imageSize): void
+    {
+        $this->imageSize = $imageSize;
+    }
+
+    public function getImageSize(): ?int
+    {
+        return $this->imageSize;
+    }
+
+    public function getImageUpdatedAt(): ?\DateTimeImmutable
+    {
+        return $this->imageUpdatedAt;
+    }
+
+    public function setImageUpdatedAt(?\DateTimeImmutable $imageUpdatedAt): void
+    {
+        $this->imageUpdatedAt = $imageUpdatedAt;
     }
 }

@@ -16,6 +16,7 @@ use Symfony\Component\OptionsResolver\OptionsResolver;
 use Symfony\Component\Validator\Constraints\NotBlank;
 use Symfony\Component\Validator\Constraints\Positive;
 use Symfony\Component\Validator\Constraints\PositiveOrZero;
+use Vich\UploaderBundle\Form\Type\VichImageType;
 
 class ToolType extends AbstractType
 {
@@ -69,6 +70,16 @@ class ToolType extends AbstractType
             ->add('location', TextType::class, [
                 'label' => 'Location',
                 'required' => false,
+                'attr' => ['class' => 'form-control']
+            ])
+            ->add('imageFile', VichImageType::class, [
+                'required' => false,
+                'allow_delete' => true,
+                'delete_label' => 'Remove image',
+                'download_uri' => false,
+                'image_uri' => false,
+                'label' => 'Tool Image',
+                'help' => 'Max 5MB. Formats: JPG, PNG, GIF',
                 'attr' => ['class' => 'form-control']
             ])
         ;
