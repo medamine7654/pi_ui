@@ -20,6 +20,7 @@
             <thead class="bg-gray-50 border-b border-gray-200">
                 <tr>
                     <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Matériel</th>
+                    <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Catégorie</th>
                     <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Propriétaire</th>
                     <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Prix/jour</th>
                     <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Stock</th>
@@ -43,6 +44,16 @@
                                     </p>
                                 </div>
                             </div>
+                        </td>
+                        <td class="px-4 py-3">
+                            {% if tool.category %}
+                                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-purple-100 text-purple-800">
+                                    <i class="{{ tool.category.icon }} mr-1"></i>
+                                    {{ tool.category.name }}
+                                </span>
+                            {% else %}
+                                <span class="text-sm text-gray-400">-</span>
+                            {% endif %}
                         </td>
                         <td class="px-4 py-3">
                             <span class="text-sm">{{ tool.host.name }}</span>

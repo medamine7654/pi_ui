@@ -35,12 +35,19 @@ class HostServiceController extends AbstractController
 
         if ($form->isSubmitted() && $form->isValid()) {
             $service->setHost($this->getUser());
-            $service->setIsActive(false);
+            
+            // Auto-approve if user is admin, otherwise needs approval
+            if ($this->isGranted('ROLE_ADMIN')) {
+                $service->setIsActive(true);
+                $this->addFlash('success', 'Service created and published successfully!');
+            } else {
+                $service->setIsActive(false);
+                $this->addFlash('success', 'Service created successfully! Waiting for admin approval.');
+            }
 
             $em->persist($service);
             $em->flush();
 
-            $this->addFlash('success', 'Service created successfully! Waiting for admin approval.');
             return $this->redirectToRoute('host_services');
         }
 
