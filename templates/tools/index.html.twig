@@ -14,9 +14,69 @@
         </p>
     </section>
 
+    {# Search and Filter Form #}
+    <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-6 mb-6">
+        {{ form_start(searchForm, {'attr': {'class': 'space-y-4'}}) }}
+            {# Search Query #}
+            <div>
+                <label class="block text-sm font-medium text-gray-700 mb-2">
+                    <i class="fa-solid fa-search mr-1"></i> Search
+                </label>
+                {{ form_widget(searchForm.query) }}
+            </div>
+
+            {# Filters Row #}
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">
+                        <i class="fa-solid fa-tag mr-1"></i> Category
+                    </label>
+                    {{ form_widget(searchForm.category) }}
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">
+                        <i class="fa-solid fa-map-marker-alt mr-1"></i> Location
+                    </label>
+                    {{ form_widget(searchForm.location) }}
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">
+                        <i class="fa-solid fa-euro-sign mr-1"></i> Min Price/Day
+                    </label>
+                    {{ form_widget(searchForm.minPrice) }}
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">
+                        <i class="fa-solid fa-euro-sign mr-1"></i> Max Price/Day
+                    </label>
+                    {{ form_widget(searchForm.maxPrice) }}
+                </div>
+            </div>
+
+            {# Sort and Submit Row #}
+            <div class="flex flex-col sm:flex-row gap-4 items-end">
+                <div class="flex-1">
+                    <label class="block text-sm font-medium text-gray-700 mb-2">
+                        <i class="fa-solid fa-sort mr-1"></i> Sort By
+                    </label>
+                    {{ form_widget(searchForm.sortBy) }}
+                </div>
+                <div class="flex gap-2">
+                    <button type="submit" class="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 font-medium transition-colors">
+                        <i class="fa-solid fa-search mr-2"></i>Search
+                    </button>
+                    <a href="{{ path('app_tools') }}" class="px-6 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 font-medium transition-colors">
+                        <i class="fa-solid fa-times mr-2"></i>Clear
+                    </a>
+                </div>
+            </div>
+        {{ form_end(searchForm) }}
+    </div>
+
     {# Results count #}
     <div class="mb-4 text-sm text-gray-600">
-        {{ tools|length }} {{ tools|length == 1 ? 'tool' : 'tools' }} available
+        <i class="fa-solid fa-list mr-1"></i>
+        {{ tools|length }} {{ tools|length == 1 ? 'tool' : 'tools' }} found
     </div>
 
     {# Tools grid #}
