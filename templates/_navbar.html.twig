@@ -27,6 +27,17 @@
                     </svg>
                     Services
                 </a>
+                {% if app.user %}
+                    <a href="{{ path('app_favorites') }}" class="flex items-center gap-2 px-3 py-2 rounded-md text-sm font-medium text-gray-700 hover:bg-gray-100 hover:text-gray-900 relative">
+                        <i class="fas fa-heart text-red-500"></i>
+                        Favorites
+                        {% if favoriteCount is defined and favoriteCount > 0 %}
+                            <span class="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center">
+                                {{ favoriteCount }}
+                            </span>
+                        {% endif %}
+                    </a>
+                {% endif %}
                 {% if is_granted('ROLE_HOST') %}
                     <a href="{{ path('host_services') }}" class="flex items-center gap-2 px-3 py-2 rounded-md text-sm font-medium text-gray-700 hover:bg-gray-100 hover:text-gray-900">
                         <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">

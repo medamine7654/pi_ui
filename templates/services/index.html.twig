@@ -76,14 +76,16 @@
     {# Results count #}
     <div class="mb-4 text-sm text-gray-600">
         <i class="fa-solid fa-list mr-1"></i>
-        {{ services|length }} {{ services|length == 1 ? 'service' : 'services' }} found
+        {{ servicesWithScores|length }} {{ servicesWithScores|length == 1 ? 'service' : 'services' }} found
     </div>
 
     {# Services grid #}
     <section>
-        {% if services|length > 0 %}
+        {% if servicesWithScores|length > 0 %}
             <div class="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
-                {% for service in services %}
+                {% for item in servicesWithScores %}
+                    {% set service = item.service %}
+                    {% set qualityScore = item.qualityScore %}
                     <div class="rounded-lg border border-gray-200 bg-white shadow-sm hover:shadow-md transition-shadow">
                         {# Service Image #}
                         {% if service.imageName %}
@@ -97,15 +99,22 @@
                         {% endif %}
                         
                         <div class="p-6 space-y-4">
-                            {# Category badge #}
-                            {% if service.category %}
-                                <div class="mb-2">
+                            {# Quality Score Badge #}
+                            <div class="flex items-center justify-between mb-3">
+                                {# Category badge #}
+                                {% if service.category %}
                                     <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
                                         <i class="{{ service.category.icon }} mr-1"></i>
                                         {{ service.category.name }}
                                     </span>
-                                </div>
-                            {% endif %}
+                                {% endif %}
+                                
+                                {# Quality Score #}
+                                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium {{ qualityScore.rating.bgClass }} {{ qualityScore.rating.textClass }}">
+                                    <i class="fa-solid {{ qualityScore.rating.icon }} mr-1"></i>
+                                    {{ qualityScore.percentage }}%
+                                </span>
+                            </div>
                             
                             {# Service header #}
                             <div class="flex items-start justify-between">
@@ -142,13 +151,22 @@
                                 Provided by {{ service.host.name }}
                             </p>
 
-                            {# View details button #}
-                            <a 
-                                href="{{ path('app_service_show', {id: service.id}) }}"
-                                class="block w-full text-center px-4 py-2 rounded-md bg-blue-600 text-white hover:bg-blue-700 font-medium text-sm transition-colors"
-                            >
-                                View Details
-                            </a>
+                            {# View details and favorite buttons #}
+                            <div class="flex gap-2">
+                                <a 
+                                    href="{{ path('app_service_show', {id: service.id}) }}"
+                                    class="flex-1 text-center px-4 py-2 rounded-md bg-blue-600 text-white hover:bg-blue-700 font-medium text-sm transition-colors"
+                                >
+                                    View Details
+                                </a>
+                                {% if app.user %}
+                                    <form method="post" action="{{ path('app_favorites_toggle', {type: 'service', id: service.id}) }}" class="inline">
+                                        <button type="submit" class="px-4 py-2 rounded-md {{ item.isFavorite ? 'bg-red-100 text-red-600 hover:bg-red-200' : 'bg-gray-100 text-gray-600 hover:bg-gray-200' }} font-medium text-sm transition-colors">
+                                            <i class="fas fa-heart"></i>
+                                        </button>
+                                    </form>
+                                {% endif %}
+                            </div>
                         </div>
                     </div>
                 {% endfor %}

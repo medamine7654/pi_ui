@@ -76,14 +76,16 @@
     {# Results count #}
     <div class="mb-4 text-sm text-gray-600">
         <i class="fa-solid fa-list mr-1"></i>
-        {{ tools|length }} {{ tools|length == 1 ? 'tool' : 'tools' }} found
+        {{ toolsWithScores|length }} {{ toolsWithScores|length == 1 ? 'tool' : 'tools' }} found
     </div>
 
     {# Tools grid #}
     <section>
-        {% if tools|length > 0 %}
+        {% if toolsWithScores|length > 0 %}
             <div class="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-                {% for tool in tools %}
+                {% for item in toolsWithScores %}
+                    {% set tool = item.tool %}
+                    {% set qualityScore = item.qualityScore %}
                     <div class="rounded-lg border border-gray-200 bg-white shadow-sm hover:shadow-md transition-shadow">
                         {# Tool Image #}
                         {% if tool.imageName %}
@@ -97,15 +99,22 @@
                         {% endif %}
                         
                         <div class="p-6 space-y-4">
-                            {# Category badge #}
-                            {% if tool.category %}
-                                <div class="mb-2">
+                            {# Quality Score Badge #}
+                            <div class="flex items-center justify-between mb-3">
+                                {# Category badge #}
+                                {% if tool.category %}
                                     <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-purple-100 text-purple-800">
                                         <i class="{{ tool.category.icon }} mr-1"></i>
                                         {{ tool.category.name }}
                                     </span>
-                                </div>
-                            {% endif %}
+                                {% endif %}
+                                
+                                {# Quality Score #}
+                                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium {{ qualityScore.rating.bgClass }} {{ qualityScore.rating.textClass }}">
+                                    <i class="fa-solid {{ qualityScore.rating.icon }} mr-1"></i>
+                                    {{ qualityScore.percentage }}%
+                                </span>
+                            </div>
                             
                             {# Tool header #}
                             <div>
@@ -149,13 +158,22 @@
                                 Owned by {{ tool.host.name }}
                             </p>
 
-                            {# View details button #}
-                            <a 
-                                href="{{ path('app_tool_show', {id: tool.id}) }}"
-                                class="block w-full text-center px-4 py-2 rounded-md bg-blue-600 text-white hover:bg-blue-700 font-medium text-sm transition-colors"
-                            >
-                                View Details
-                            </a>
+                            {# View details and favorite buttons #}
+                            <div class="flex gap-2">
+                                <a 
+                                    href="{{ path('app_tool_show', {id: tool.id}) }}"
+                                    class="flex-1 text-center px-4 py-2 rounded-md bg-blue-600 text-white hover:bg-blue-700 font-medium text-sm transition-colors"
+                                >
+                                    View Details
+                                </a>
+                                {% if app.user %}
+                                    <form method="post" action="{{ path('app_favorites_toggle', {type: 'tool', id: tool.id}) }}" class="inline">
+                                        <button type="submit" class="px-4 py-2 rounded-md {{ item.isFavorite ? 'bg-red-100 text-red-600 hover:bg-red-200' : 'bg-gray-100 text-gray-600 hover:bg-gray-200' }} font-medium text-sm transition-colors">
+                                            <i class="fas fa-heart"></i>
+                                        </button>
+                                    </form>
+                                {% endif %}
+                            </div>
                         </div>
                     </div>
                 {% endfor %}

@@ -3,7 +3,9 @@
 namespace App\Controller;
 
 use App\Form\SearchFilterType;
+use App\Repository\FavoriteRepository;
 use App\Repository\ToolRepository;
+use App\Service\QualityScoreService;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -12,7 +14,7 @@ use Symfony\Component\Routing\Annotation\Route;
 class ToolController extends AbstractController
 {
     #[Route('/tools', name: 'app_tools')]
-    public function index(Request $request, ToolRepository $toolRepository): Response
+    public function index(Request $request, ToolRepository $toolRepository, QualityScoreService $qualityScoreService, FavoriteRepository $favoriteRepository): Response
     {
         // Create the search form
         $form = $this->createForm(SearchFilterType::class, null, ['type' => 'tool']);
@@ -36,14 +38,30 @@ class ToolController extends AbstractController
             $sortBy
         );
 
+        // Calculate quality scores and check favorites for each tool
+        $toolsWithScores = [];
+        $user = $this->getUser();
+        foreach ($tools as $tool) {
+            $isFavorite = false;
+            if ($user) {
+                $isFavorite = $favoriteRepository->isFavorite($user, 'tool', $tool->getId());
+            }
+            
+            $toolsWithScores[] = [
+                'tool' => $tool,
+                'qualityScore' => $qualityScoreService->calculateToolScore($tool),
+                'isFavorite' => $isFavorite,
+            ];
+        }
+
         return $this->render('tools/index.html.twig', [
-            'tools' => $tools,
+            'toolsWithScores' => $toolsWithScores,
             'searchForm' => $form->createView(),
         ]);
     }
 
     #[Route('/tools/{id}', name: 'app_tool_show')]
-    public function show(int $id, ToolRepository $toolRepository): Response
+    public function show(int $id, ToolRepository $toolRepository, QualityScoreService $qualityScoreService): Response
     {
         $tool = $toolRepository->find($id);
 
@@ -51,8 +69,11 @@ class ToolController extends AbstractController
             throw $this->createNotFoundException('Tool not found');
         }
 
+        $qualityScore = $qualityScoreService->calculateToolScore($tool);
+
         return $this->render('tools/show.html.twig', [
             'tool' => $tool,
+            'qualityScore' => $qualityScore,
         ]);
     }
 }
