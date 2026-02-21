@@ -2,37 +2,34 @@
 
 namespace App\Controller;
 
+use App\Repository\ServiceRepository;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
-use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
 
-#[Route('/services')]
 class ServiceController extends AbstractController
 {
-    #[Route('/', name: 'app_services')]
-    public function index(Request $request): Response
+    #[Route('/services', name: 'app_services')]
+    public function index(ServiceRepository $serviceRepository): Response
     {
-        $filters = [
-            'category' => $request->query->get('category'),
-        ];
-
-        // TODO: Replace with actual Doctrine repository query
-        $services = []; // $this->getDoctrine()->getRepository(Service::class)->findByFilters($filters);
-        $hosts = []; // Get hosts indexed by ID
+        $services = $serviceRepository->findAllActive();
 
         return $this->render('services/index.html.twig', [
             'services' => $services,
-            'hosts' => $hosts,
-            'filters' => $filters,
         ]);
     }
 
-    #[Route('/{id}/book', name: 'app_service_book')]
-    public function book(int $id): Response
+    #[Route('/services/{id}', name: 'app_service_show')]
+    public function show(int $id, ServiceRepository $serviceRepository): Response
     {
-        // TODO: Implement service booking form
-        $this->denyAccessUnlessGranted('ROLE_USER');
-        return new Response('Service booking form - ID: ' . $id);
+        $service = $serviceRepository->find($id);
+
+        if (!$service || !$service->getIsActive()) {
+            throw $this->createNotFoundException('Service not found');
+        }
+
+        return $this->render('services/show.html.twig', [
+            'service' => $service,
+        ]);
     }
 }

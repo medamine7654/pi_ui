@@ -19,35 +19,20 @@
             </div>
             <span class="font-bold text-lg text-dark font-heading">RentAdmin</span>
         </div>
-        <button id="sidebar-toggle" class="hidden lg:flex text-gray-400 hover:text-dark">
-            <i class="fas fa-chevron-left"></i>
-        </button>
     </div>
 
     <!-- Navigation -->
     <nav class="p-3 space-y-1 overflow-y-auto h-[calc(100vh-4rem)]">
-        {% set nav_items = [
-            { route: 'admin_dashboard', icon: 'fa-chart-line', label: 'Tableau de bord' },
-            { route: 'admin_users', icon: 'fa-users', label: 'Utilisateurs' },
-            { route: 'admin_services', icon: 'fa-briefcase', label: 'Services' },
-            { route: 'admin_tools', icon: 'fa-wrench', label: 'Matériel' },
-            { route: 'admin_bookings', icon: 'fa-calendar', label: 'Réservations' },
-            { route: 'admin_reports', icon: 'fa-flag', label: 'Signalements', badge: pending_reports|default(0) },
-            { route: 'admin_analytics', icon: 'fa-chart-bar', label: 'Analytics' },
-            { route: 'admin_settings', icon: 'fa-cog', label: 'Paramètres' },
-        ] %}
+        <a href="{{ path('admin_services') }}" 
+           class="flex items-center gap-3 px-3 py-2.5 rounded-lg transition-all duration-200 {% if current_route == 'admin_services' %}bg-primary text-white{% else %}text-dark hover:bg-gray-100{% endif %}">
+            <i class="fas fa-briefcase w-5 text-center"></i>
+            <span class="flex-1 text-sm font-medium">Services</span>
+        </a>
         
-        {% for item in nav_items %}
-            <a href="{{ path(item.route) }}" 
-               class="flex items-center gap-3 px-3 py-2.5 rounded-lg transition-all duration-200 {% if current_route == item.route %}bg-primary text-white{% else %}text-dark hover:bg-gray-100{% endif %}">
-                <i class="fas {{ item.icon }} w-5 text-center"></i>
-                <span class="flex-1 text-sm font-medium">{{ item.label }}</span>
-                {% if item.badge is defined and item.badge > 0 %}
-                    <span class="px-2 py-0.5 text-xs rounded-full {% if current_route == item.route %}bg-white/20{% else %}bg-primary text-white{% endif %}">
-                        {{ item.badge }}
-                    </span>
-                {% endif %}
-            </a>
-        {% endfor %}
+        <a href="{{ path('admin_tools') }}" 
+           class="flex items-center gap-3 px-3 py-2.5 rounded-lg transition-all duration-200 {% if current_route == 'admin_tools' %}bg-primary text-white{% else %}text-dark hover:bg-gray-100{% endif %}">
+            <i class="fas fa-wrench w-5 text-center"></i>
+            <span class="flex-1 text-sm font-medium">Matériel</span>
+        </a>
     </nav>
 </aside>

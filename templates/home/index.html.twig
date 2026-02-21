@@ -1,73 +1,71 @@
 {% extends 'base.html.twig' %}
 
-{% block title %}Find your perfect stay - RentAll{% endblock %}
+{% block title %}Home - Smart Rental Platform{% endblock %}
 
 {% block body %}
-<div class="container mx-auto px-4 py-6">
-    {# Hero section #}
-    <section class="mb-8 text-center">
-        <h1 class="text-3xl font-bold tracking-tight text-gray-900 sm:text-4xl">
-            Find your perfect stay
+<div class="container mx-auto px-4 py-12">
+    {# Hero Section #}
+    <div class="text-center mb-16">
+        <h1 class="text-5xl font-bold text-gray-900 mb-4">
+            Welcome to RentAll
         </h1>
-        <p class="mt-2 text-gray-600">
-            Discover unique places to stay around the world
+        <p class="text-xl text-gray-600 mb-8">
+            Rent tools, book services, and find homes from your neighbors
         </p>
-        
-        {# Add Home button for logged-in users #}
-        {% if app.user %}
-            <div class="mt-4">
-                <a href="{{ path('logement_new') }}" class="inline-flex items-center px-6 py-3 border border-transparent text-base font-medium rounded-md shadow-sm text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition-colors">
-                    <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
-                    </svg>
-                    Add Your Home
-                </a>
-            </div>
-        {% endif %}
-    </section>
-
-    {# Search and filters #}
-    <section class="mb-8">
-        {% include 'components/search_filters.html.twig' with {filters: filters} %}
-    </section>
-
-    {# Results count #}
-    <div class="mb-4 text-sm text-gray-600">
-        {{ logements|length }} {{ logements|length == 1 ? 'place' : 'places' }} found
+        <div class="flex justify-center gap-4">
+            <a href="{{ path('app_services') }}" class="px-8 py-3 bg-blue-600 text-white rounded-lg font-medium hover:bg-blue-700 transition-colors">
+                Browse Services
+            </a>
+            <a href="{{ path('app_homes') }}" class="px-8 py-3 bg-indigo-600 text-white rounded-lg font-medium hover:bg-indigo-700 transition-colors">
+                Browse Homes
+            </a>
+            <a href="{{ path('app_tools') }}" class="px-8 py-3 border-2 border-blue-600 text-blue-600 rounded-lg font-medium hover:bg-blue-50 transition-colors">
+                Browse Tools
+            </a>
+        </div>
     </div>
 
-    {# Logements grid #}
-    <section>
-        {% if isLoading %}
-            {# Loading skeleton #}
-            {% import 'components/logement_card.html.twig' as card %}
-            <div class="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-                {% for i in 0..7 %}
-                    {{ card.skeleton() }}
-                {% endfor %}
+    {# Features Grid #}
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 mt-12">
+        <div class="text-center p-6">
+            <div class="inline-flex items-center justify-center w-16 h-16 bg-blue-100 rounded-full mb-4">
+                <svg class="h-8 w-8 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.121 14.121L19 19m-7-7l7-7m-7 7l-2.879 2.879M12 12L9.121 9.121m0 5.758a3 3 0 10-4.243 4.243 3 3 0 004.243-4.243zm0-5.758a3 3 0 10-4.243-4.243 3 3 0 004.243 4.243z"/>
+                </svg>
             </div>
-        {% elseif logements|length > 0 %}
-            {# Logements grid #}
-            {% import 'components/logement_card.html.twig' as card %}
-            <div class="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-                {% for logement in logements %}
-                    {{ card.render(logement, hosts[logement.hostId] ?? null) }}
-                {% endfor %}
+            <h3 class="text-xl font-semibold text-gray-900 mb-2">🔧 Rent Tools</h3>
+            <p class="text-gray-600">Find the perfect tool for your project without buying expensive equipment.</p>
+        </div>
+
+        <div class="text-center p-6">
+            <div class="inline-flex items-center justify-center w-16 h-16 bg-green-100 rounded-full mb-4">
+                <svg class="h-8 w-8 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 13.255A23.931 23.931 0 0112 15c-3.183 0-6.22-.62-9-1.745M16 6V4a2 2 0 00-2-2h-4a2 2 0 00-2 2v2m4 6h.01M5 20h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/>
+                </svg>
             </div>
-        {% else %}
-            {# Empty state #}
-            <div class="flex flex-col items-center justify-center py-12 text-center">
-                <div class="rounded-full bg-gray-100 p-6">
-                    <svg class="h-12 w-12 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
-                    </svg>
-                </div>
-                <h3 class="mt-4 text-lg font-medium text-gray-900">No places found</h3>
-                <p class="mt-1 text-gray-600">
-                    Try adjusting your search or filters
-                </p>
+            <h3 class="text-xl font-semibold text-gray-900 mb-2">🛠️ Book Services</h3>
+            <p class="text-gray-600">Get professional help from skilled neighbors for your home projects.</p>
+        </div>
+
+        <div class="text-center p-6">
+            <div class="inline-flex items-center justify-center w-16 h-16 bg-indigo-100 rounded-full mb-4">
+                <svg class="h-8 w-8 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/>
+                </svg>
             </div>
-        {% endif %}
-    </section>
+            <h3 class="text-xl font-semibold text-gray-900 mb-2">🏠 Find Homes</h3>
+            <p class="text-gray-600">Discover unique places to stay in your community.</p>
+        </div>
+
+        <div class="text-center p-6">
+            <div class="inline-flex items-center justify-center w-16 h-16 bg-purple-100 rounded-full mb-4">
+                <svg class="h-8 w-8 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                </svg>
+            </div>
+            <h3 class="text-xl font-semibold text-gray-900 mb-2">💰 Become a Host</h3>
+            <p class="text-gray-600">Share your home, tools or skills to earn extra income.</p>
+        </div>
+    </div>
 </div>
 {% endblock %}

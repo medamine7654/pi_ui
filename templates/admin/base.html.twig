@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}RentAdmin - Dashboard{% endblock %}</title>
+    
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&family=Open+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+    
+    <!-- Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#FF5A5F',
+                        secondary: '#00A699',
+                        dark: '#484848',
+                        light: '#FFFFFF',
+                        background: '#F7F7F7',
+                    },
+                    fontFamily: {
+                        heading: ['Montserrat', 'sans-serif'],
+                        body: ['Open Sans', 'sans-serif'],
+                    }
+                }
+            }
+        }
+    </script>
+    
+    {% block stylesheets %}{% endblock %}
+</head>
+<body class="bg-background font-body">
+    <div class="min-h-screen flex">
+        <!-- Sidebar -->
+        {% include 'admin/_sidebar.html.twig' %}
+        
+        <!-- Main Content -->
+        <main class="flex-1 lg:ml-64 transition-all duration-300">
+            <!-- Header -->
+            {% include 'admin/_header.html.twig' %}
+            
+            <!-- Page Content -->
+            <div class="pt-16 p-4 lg:p-8">
+                {% for message in app.flashes('success') %}
+                    <div class="mb-4 p-4 bg-green-100 text-green-700 rounded-lg flex items-center gap-2">
+                        <i class="fas fa-check-circle"></i>
+                        <span>{{ message }}</span>
+                    </div>
+                {% endfor %}
+                
+                {% for message in app.flashes('error') %}
+                    <div class="mb-4 p-4 bg-red-100 text-red-700 rounded-lg flex items-center gap-2">
+                        <i class="fas fa-exclamation-circle"></i>
+                        <span>{{ message }}</span>
+                    </div>
+                {% endfor %}
+                
+                {% block body %}{% endblock %}
+            </div>
+        </main>
+    </div>
+    
+    <!-- JavaScript -->
+    <script>
+        // Mobile toggle
+        const mobileToggle = document.getElementById('mobile-toggle');
+        const sidebar = document.getElementById('sidebar');
+        const mobileOverlay = document.getElementById('mobile-overlay');
+        
+        if (mobileToggle) {
+            mobileToggle.addEventListener('click', () => {
+                sidebar.classList.toggle('-translate-x-full');
+                mobileOverlay.classList.toggle('hidden');
+            });
+        }
+        
+        if (mobileOverlay) {
+            mobileOverlay.addEventListener('click', () => {
+                sidebar.classList.add('-translate-x-full');
+                mobileOverlay.classList.add('hidden');
+            });
+        }
+        
+        // Notifications toggle
+        const notificationsToggle = document.getElementById('notifications-toggle');
+        const notificationsDropdown = document.getElementById('notifications-dropdown');
+        
+        if (notificationsToggle) {
+            notificationsToggle.addEventListener('click', (e) => {
+                e.stopPropagation();
+                notificationsDropdown.classList.toggle('hidden');
+            });
+        }
+        
+        document.addEventListener('click', () => {
+            if (notificationsDropdown && !notificationsDropdown.classList.contains('hidden')) {
+                notificationsDropdown.classList.add('hidden');
+            }
+        });
+        
+        // Dropdown toggle function
+        function toggleDropdown(id) {
+            const dropdown = document.getElementById(id);
+            const allDropdowns = document.querySelectorAll('[id$="-dropdown"]');
+            allDropdowns.forEach(d => {
+                if (d.id !== id) d.classList.add('hidden');
+            });
+            dropdown.classList.toggle('hidden');
+        }
+        
+        document.addEventListener('click', (e) => {
+            if (!e.target.closest('button')) {
+                document.querySelectorAll('[id$="-dropdown"]').forEach(d => d.classList.add('hidden'));
+            }
+        });
+    </script>
+    {% block javascripts %}{% endblock %}
+</body>
+</html>

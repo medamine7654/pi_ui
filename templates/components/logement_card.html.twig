@@ -9,11 +9,11 @@
                 <div 
                     class="relative aspect-square overflow-hidden rounded-xl"
                     data-controller="carousel"
-                    data-carousel-images-value="{{ logement.images|json_encode }}"
+                    data-carousel-images-value="{{ logement.imageUrls|json_encode }}"
                 >
                     {# Main image #}
                     <img 
-                        src="{{ logement.images[0] ?? asset('placeholder.svg') }}" 
+                        src="{{ logement.imageUrls[0] ?? asset('placeholder.svg') }}" 
                         alt="{{ logement.title }}"
                         class="w-full h-full object-cover transition-transform group-hover:scale-105"
                         data-carousel-target="image"
@@ -33,7 +33,7 @@
                     </button>
 
                     {# Image navigation buttons #}
-                    {% if logement.images|length > 1 %}
+                    {% if logement.imageUrls|length > 1 %}
                         <button 
                             type="button"
                             class="absolute left-2 top-1/2 h-7 w-7 -translate-y-1/2 rounded-full bg-white/90 shadow-md opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center"
@@ -57,7 +57,7 @@
 
                         {# Image dots indicator #}
                         <div class="absolute bottom-2 left-1/2 -translate-x-1/2 flex gap-1" data-carousel-target="dots">
-                            {% for image in logement.images %}
+                            {% for image in logement.imageUrls %}
                                 <div class="h-1.5 w-1.5 rounded-full transition-colors {% if loop.first %}bg-white{% else %}bg-white/50{% endif %}" data-index="{{ loop.index0 }}"></div>
                             {% endfor %}
                         </div>
