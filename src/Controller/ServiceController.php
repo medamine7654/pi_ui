@@ -6,6 +6,7 @@ use App\Form\SearchFilterType;
 use App\Repository\FavoriteRepository;
 use App\Repository\ServiceRepository;
 use App\Service\QualityScoreService;
+use Knp\Component\Pager\PaginatorInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -14,8 +15,13 @@ use Symfony\Component\Routing\Annotation\Route;
 class ServiceController extends AbstractController
 {
     #[Route('/services', name: 'app_services')]
-    public function index(Request $request, ServiceRepository $serviceRepository, QualityScoreService $qualityScoreService, FavoriteRepository $favoriteRepository): Response
-    {
+    public function index(
+        Request $request, 
+        ServiceRepository $serviceRepository, 
+        QualityScoreService $qualityScoreService, 
+        FavoriteRepository $favoriteRepository,
+        PaginatorInterface $paginator
+    ): Response {
         // Create the search form
         $form = $this->createForm(SearchFilterType::class, null, ['type' => 'service']);
         $form->handleRequest($request);
@@ -28,8 +34,8 @@ class ServiceController extends AbstractController
         $maxPrice = $form->get('maxPrice')->getData();
         $sortBy = $form->get('sortBy')->getData();
 
-        // Fetch filtered services
-        $services = $serviceRepository->findBySearchFilters(
+        // Get QueryBuilder for filtered services
+        $queryBuilder = $serviceRepository->findBySearchFiltersQuery(
             $query,
             $category,
             $location,
@@ -38,10 +44,17 @@ class ServiceController extends AbstractController
             $sortBy
         );
 
+        // Paginate results
+        $pagination = $paginator->paginate(
+            $queryBuilder,
+            $request->query->getInt('page', 1),
+            12 // items per page
+        );
+
         // Calculate quality scores and check favorites for each service
         $servicesWithScores = [];
         $user = $this->getUser();
-        foreach ($services as $service) {
+        foreach ($pagination as $service) {
             $isFavorite = false;
             if ($user) {
                 $isFavorite = $favoriteRepository->isFavorite($user, 'service', $service->getId());
@@ -56,6 +69,7 @@ class ServiceController extends AbstractController
 
         return $this->render('services/index.html.twig', [
             'servicesWithScores' => $servicesWithScores,
+            'pagination' => $pagination,
             'searchForm' => $form->createView(),
         ]);
     }

@@ -44,15 +44,16 @@ class ToolRepository extends ServiceEntityRepository
 
     /**
      * Search and filter tools with sorting
+     * Returns QueryBuilder for pagination support
      */
-    public function findBySearchFilters(
+    public function findBySearchFiltersQuery(
         ?string $query,
         ?\App\Entity\Category $category,
         ?string $location,
         ?float $minPrice,
         ?float $maxPrice,
         ?string $sortBy = 'date_desc'
-    ): array {
+    ) {
         $qb = $this->createQueryBuilder('t')
             ->where('t.isActive = :active')
             ->setParameter('active', true);
@@ -109,6 +110,6 @@ class ToolRepository extends ServiceEntityRepository
                 break;
         }
 
-        return $qb->getQuery()->getResult();
+        return $qb;
     }
 }

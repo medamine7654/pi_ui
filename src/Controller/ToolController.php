@@ -6,6 +6,7 @@ use App\Form\SearchFilterType;
 use App\Repository\FavoriteRepository;
 use App\Repository\ToolRepository;
 use App\Service\QualityScoreService;
+use Knp\Component\Pager\PaginatorInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -14,8 +15,13 @@ use Symfony\Component\Routing\Annotation\Route;
 class ToolController extends AbstractController
 {
     #[Route('/tools', name: 'app_tools')]
-    public function index(Request $request, ToolRepository $toolRepository, QualityScoreService $qualityScoreService, FavoriteRepository $favoriteRepository): Response
-    {
+    public function index(
+        Request $request, 
+        ToolRepository $toolRepository, 
+        QualityScoreService $qualityScoreService, 
+        FavoriteRepository $favoriteRepository,
+        PaginatorInterface $paginator
+    ): Response {
         // Create the search form
         $form = $this->createForm(SearchFilterType::class, null, ['type' => 'tool']);
         $form->handleRequest($request);
@@ -28,8 +34,8 @@ class ToolController extends AbstractController
         $maxPrice = $form->get('maxPrice')->getData();
         $sortBy = $form->get('sortBy')->getData();
 
-        // Fetch filtered tools
-        $tools = $toolRepository->findBySearchFilters(
+        // Get QueryBuilder for filtered tools
+        $queryBuilder = $toolRepository->findBySearchFiltersQuery(
             $query,
             $category,
             $location,
@@ -38,10 +44,17 @@ class ToolController extends AbstractController
             $sortBy
         );
 
+        // Paginate results
+        $pagination = $paginator->paginate(
+            $queryBuilder,
+            $request->query->getInt('page', 1),
+            12 // items per page
+        );
+
         // Calculate quality scores and check favorites for each tool
         $toolsWithScores = [];
         $user = $this->getUser();
-        foreach ($tools as $tool) {
+        foreach ($pagination as $tool) {
             $isFavorite = false;
             if ($user) {
                 $isFavorite = $favoriteRepository->isFavorite($user, 'tool', $tool->getId());
@@ -56,6 +69,7 @@ class ToolController extends AbstractController
 
         return $this->render('tools/index.html.twig', [
             'toolsWithScores' => $toolsWithScores,
+            'pagination' => $pagination,
             'searchForm' => $form->createView(),
         ]);
     }
