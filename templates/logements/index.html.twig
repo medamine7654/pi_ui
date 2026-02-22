@@ -1,0 +1,271 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Logements - RentAll{% endblock %}
+
+{% block body %}
+<div class="container mx-auto px-4 py-6">
+    {# Hero section #}
+    <section class="mb-8 text-center">
+        <h1 class="text-3xl font-bold tracking-tight text-gray-900 sm:text-4xl">
+            Find Your Perfect Stay
+        </h1>
+        <p class="mt-2 text-gray-600">
+            Discover amazing accommodations for your next adventure
+        </p>
+    </section>
+
+    {# Search and Filter Form #}
+    <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-6 mb-6">
+        {{ form_start(searchForm, {'attr': {'class': 'space-y-4'}}) }}
+            {# Search Query #}
+            <div>
+                <label class="block text-sm font-medium text-gray-700 mb-2">
+                    <i class="fa-solid fa-search mr-1"></i> Search
+                </label>
+                {{ form_widget(searchForm.query) }}
+            </div>
+
+            {# Filters Row #}
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">
+                        <i class="fa-solid fa-tag mr-1"></i> Category
+                    </label>
+                    {{ form_widget(searchForm.category) }}
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">
+                        <i class="fa-solid fa-map-marker-alt mr-1"></i> Location
+                    </label>
+                    {{ form_widget(searchForm.location) }}
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">
+                        <i class="fa-solid fa-euro-sign mr-1"></i> Min Price
+                    </label>
+                    {{ form_widget(searchForm.minPrice) }}
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">
+                        <i class="fa-solid fa-euro-sign mr-1"></i> Max Price
+                    </label>
+                    {{ form_widget(searchForm.maxPrice) }}
+                </div>
+            </div>
+
+            {# Sort and Submit Row #}
+            <div class="flex flex-col sm:flex-row gap-4 items-end">
+                <div class="flex-1">
+                    <label class="block text-sm font-medium text-gray-700 mb-2">
+                        <i class="fa-solid fa-sort mr-1"></i> Sort By
+                    </label>
+                    {{ form_widget(searchForm.sortBy) }}
+                </div>
+                <div class="flex gap-2">
+                    <button type="submit" class="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 font-medium transition-colors">
+                        <i class="fa-solid fa-search mr-2"></i>Search
+                    </button>
+                    <a href="{{ path('app_logements') }}" class="px-6 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 font-medium transition-colors">
+                        <i class="fa-solid fa-times mr-2"></i>Clear
+                    </a>
+                </div>
+            </div>
+        {{ form_end(searchForm) }}
+    </div>
+
+    {# Results count #}
+    <div class="mb-4 text-sm text-gray-600">
+        <i class="fa-solid fa-list mr-1"></i>
+        {{ pagination.getTotalItemCount }} {{ pagination.getTotalItemCount == 1 ? 'property' : 'properties' }} found
+    </div>
+
+    {# Logements grid #}
+    <section>
+        {% if logementsWithScores|length > 0 %}
+            <div class="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
+                {% for item in logementsWithScores %}
+                    {% set logement = item.logement %}
+                    {% set qualityScore = item.qualityScore %}
+                    <div class="rounded-lg border border-gray-200 bg-white shadow-sm hover:shadow-md transition-shadow">
+                        {# Logement Image #}
+                        {% if logement.imageName %}
+                            <img src="{{ asset('uploads/logements/' ~ logement.imageName) }}" 
+                                 alt="{{ logement.name }}" 
+                                 class="w-full h-48 object-cover rounded-t-lg">
+                        {% else %}
+                            <div class="w-full h-48 bg-gradient-to-br from-purple-100 to-purple-200 rounded-t-lg flex items-center justify-center">
+                                <i class="fa-solid fa-home text-purple-400 text-5xl"></i>
+                            </div>
+                        {% endif %}
+                        
+                        <div class="p-6 space-y-4">
+                            {# Quality Score Badge #}
+                            <div class="flex items-center justify-between mb-3">
+                                {# Category badge #}
+                                {% if logement.category %}
+                                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-purple-100 text-purple-800">
+                                        <i class="{{ logement.category.icon }} mr-1"></i>
+                                        {{ logement.category.name }}
+                                    </span>
+                                {% endif %}
+                                
+                                {# Quality Score #}
+                                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium {{ qualityScore.rating.bgClass }} {{ qualityScore.rating.textClass }}">
+                                    <i class="fa-solid {{ qualityScore.rating.icon }} mr-1"></i>
+                                    {{ qualityScore.percentage }}%
+                                </span>
+                            </div>
+                            
+                            {# Logement header #}
+                            <div class="flex items-start justify-between">
+                                <div class="flex-1">
+                                    <h3 class="font-semibold text-lg text-gray-900">{{ logement.name }}</h3>
+                                    <p class="text-sm text-gray-500 mt-1">
+                                        <svg class="inline h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/>
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/>
+                                        </svg>
+                                        {{ logement.fullLocation }}
+                                    </p>
+                                </div>
+                                <div class="text-right">
+                                    <p class="text-2xl font-bold text-gray-900">€{{ logement.pricePerNight }}</p>
+                                    <p class="text-xs text-gray-500">per night</p>
+                                </div>
+                            </div>
+
+                            {# Property details #}
+                            {% if logement.numberOfRooms or logement.numberOfBeds or logement.maxGuests %}
+                                <div class="flex gap-3 text-sm text-gray-600">
+                                    {% if logement.numberOfRooms %}
+                                        <span><i class="fa-solid fa-door-open mr-1"></i>{{ logement.numberOfRooms }} rooms</span>
+                                    {% endif %}
+                                    {% if logement.numberOfBeds %}
+                                        <span><i class="fa-solid fa-bed mr-1"></i>{{ logement.numberOfBeds }} beds</span>
+                                    {% endif %}
+                                    {% if logement.maxGuests %}
+                                        <span><i class="fa-solid fa-users mr-1"></i>{{ logement.maxGuests }} guests</span>
+                                    {% endif %}
+                                </div>
+                            {% endif %}
+
+                            {# Logement description #}
+                            {% if logement.description %}
+                                <p class="text-sm text-gray-600">
+                                    {{ logement.description|length > 100 ? logement.description|slice(0, 100) ~ '...' : logement.description }}
+                                </p>
+                            {% endif %}
+
+                            {# Host info #}
+                            <p class="text-sm text-gray-500">
+                                <svg class="inline h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/>
+                                </svg>
+                                Hosted by {{ logement.host.name }}
+                            </p>
+
+                            {# View details and favorite buttons #}
+                            <div class="flex gap-2">
+                                <a 
+                                    href="{{ path('app_logement_show', {id: logement.id}) }}"
+                                    class="flex-1 text-center px-4 py-2 rounded-md bg-purple-600 text-white hover:bg-purple-700 font-medium text-sm transition-colors"
+                                >
+                                    View Details
+                                </a>
+                                {% if app.user %}
+                                    <form method="post" action="{{ path('app_favorites_toggle', {type: 'logement', id: logement.id}) }}" class="inline">
+                                        <button type="submit" class="px-4 py-2 rounded-md {{ item.isFavorite ? 'bg-red-100 text-red-600 hover:bg-red-200' : 'bg-gray-100 text-gray-600 hover:bg-gray-200' }} font-medium text-sm transition-colors">
+                                            <i class="fas fa-heart"></i>
+                                        </button>
+                                    </form>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
+
+            {# Pagination controls #}
+            {% if pagination.getTotalItemCount > 12 %}
+                <div class="mt-8 flex justify-center">
+                    <nav class="inline-flex rounded-md shadow-sm -space-x-px" aria-label="Pagination">
+                        {# Previous button #}
+                        {% if pagination.currentPageNumber > 1 %}
+                            <a href="{{ path('app_logements', app.request.query.all|merge({'page': pagination.currentPageNumber - 1})) }}" 
+                               class="relative inline-flex items-center px-3 py-2 rounded-l-md border border-gray-300 bg-white text-sm font-medium text-gray-700 hover:bg-gray-50">
+                                <i class="fa-solid fa-chevron-left"></i>
+                            </a>
+                        {% else %}
+                            <span class="relative inline-flex items-center px-3 py-2 rounded-l-md border border-gray-300 bg-gray-100 text-sm font-medium text-gray-400 cursor-not-allowed">
+                                <i class="fa-solid fa-chevron-left"></i>
+                            </span>
+                        {% endif %}
+
+                        {# Page numbers #}
+                        {% set startPage = max(1, pagination.currentPageNumber - 2) %}
+                        {% set endPage = min(pagination.pageCount, pagination.currentPageNumber + 2) %}
+                        
+                        {% if startPage > 1 %}
+                            <a href="{{ path('app_logements', app.request.query.all|merge({'page': 1})) }}" 
+                               class="relative inline-flex items-center px-4 py-2 border border-gray-300 bg-white text-sm font-medium text-gray-700 hover:bg-gray-50">
+                                1
+                            </a>
+                            {% if startPage > 2 %}
+                                <span class="relative inline-flex items-center px-4 py-2 border border-gray-300 bg-white text-sm font-medium text-gray-700">...</span>
+                            {% endif %}
+                        {% endif %}
+
+                        {% for page in startPage..endPage %}
+                            {% if page == pagination.currentPageNumber %}
+                                <span class="relative inline-flex items-center px-4 py-2 border border-purple-600 bg-purple-600 text-sm font-medium text-white">
+                                    {{ page }}
+                                </span>
+                            {% else %}
+                                <a href="{{ path('app_logements', app.request.query.all|merge({'page': page})) }}" 
+                                   class="relative inline-flex items-center px-4 py-2 border border-gray-300 bg-white text-sm font-medium text-gray-700 hover:bg-gray-50">
+                                    {{ page }}
+                                </a>
+                            {% endif %}
+                        {% endfor %}
+
+                        {% if endPage < pagination.pageCount %}
+                            {% if endPage < pagination.pageCount - 1 %}
+                                <span class="relative inline-flex items-center px-4 py-2 border border-gray-300 bg-white text-sm font-medium text-gray-700">...</span>
+                            {% endif %}
+                            <a href="{{ path('app_logements', app.request.query.all|merge({'page': pagination.pageCount})) }}" 
+                               class="relative inline-flex items-center px-4 py-2 border border-gray-300 bg-white text-sm font-medium text-gray-700 hover:bg-gray-50">
+                                {{ pagination.pageCount }}
+                            </a>
+                        {% endif %}
+
+                        {# Next button #}
+                        {% if pagination.currentPageNumber < pagination.pageCount %}
+                            <a href="{{ path('app_logements', app.request.query.all|merge({'page': pagination.currentPageNumber + 1})) }}" 
+                               class="relative inline-flex items-center px-3 py-2 rounded-r-md border border-gray-300 bg-white text-sm font-medium text-gray-700 hover:bg-gray-50">
+                                <i class="fa-solid fa-chevron-right"></i>
+                            </a>
+                        {% else %}
+                            <span class="relative inline-flex items-center px-3 py-2 rounded-r-md border border-gray-300 bg-gray-100 text-sm font-medium text-gray-400 cursor-not-allowed">
+                                <i class="fa-solid fa-chevron-right"></i>
+                            </span>
+                        {% endif %}
+                    </nav>
+                </div>
+            {% endif %}
+        {% else %}
+            {# Empty state #}
+            <div class="flex flex-col items-center justify-center py-12 text-center">
+                <div class="rounded-full bg-gray-100 p-6">
+                    <svg class="h-12 w-12 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/>
+                    </svg>
+                </div>
+                <h3 class="mt-4 text-lg font-medium text-gray-900">No properties found</h3>
+                <p class="mt-1 text-gray-600">
+                    Try adjusting your search filters
+                </p>
+            </div>
+        {% endif %}
+    </section>
+</div>
+{% endblock %}

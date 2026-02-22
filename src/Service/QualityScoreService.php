@@ -2,6 +2,7 @@
 
 namespace App\Service;
 
+use App\Entity\Logement;
 use App\Entity\Service;
 use App\Entity\Tool;
 
@@ -162,6 +163,109 @@ class QualityScoreService
 
         // 6. Recently Created (5 points)
         $daysSinceCreation = (new \DateTime())->diff($tool->getCreatedAt())->days;
+        if ($daysSinceCreation <= 30) {
+            $score += 5;
+            $checks[] = ['passed' => true, 'message' => 'Recently added'];
+        }
+
+        // Calculate percentage
+        $percentage = round(($score / $maxScore) * 100);
+
+        // Determine rating
+        $rating = $this->getRating($percentage);
+
+        return [
+            'score' => $score,
+            'maxScore' => $maxScore,
+            'percentage' => $percentage,
+            'rating' => $rating,
+            'suggestions' => $suggestions,
+            'checks' => $checks,
+        ];
+    }
+
+    /**
+     * Calculate quality score for a Logement
+     */
+    public function calculateLogementScore(Logement $logement): array
+    {
+        $score = 0;
+        $maxScore = 100;
+        $suggestions = [];
+        $checks = [];
+
+        // 1. Has Image (30 points)
+        if ($logement->getImageName()) {
+            $score += 30;
+            $checks[] = ['passed' => true, 'message' => 'Has professional image'];
+        } else {
+            $suggestions[] = 'Add an image to make your listing more attractive';
+            $checks[] = ['passed' => false, 'message' => 'Missing image'];
+        }
+
+        // 2. Description Length (25 points)
+        $description = $logement->getDescription();
+        if ($description && strlen($description) >= 100) {
+            $score += 25;
+            $checks[] = ['passed' => true, 'message' => 'Detailed description provided'];
+        } elseif ($description && strlen($description) >= 50) {
+            $score += 12;
+            $suggestions[] = 'Add more details to your description (at least 100 characters)';
+            $checks[] = ['passed' => false, 'message' => 'Description could be more detailed'];
+        } else {
+            $suggestions[] = 'Write a detailed description (at least 100 characters)';
+            $checks[] = ['passed' => false, 'message' => 'Description is too short'];
+        }
+
+        // 3. Has Category (15 points)
+        if ($logement->getCategory()) {
+            $score += 15;
+            $checks[] = ['passed' => true, 'message' => 'Category assigned'];
+        } else {
+            $suggestions[] = 'Assign a category to help users find your property';
+            $checks[] = ['passed' => false, 'message' => 'No category assigned'];
+        }
+
+        // 4. Has Complete Location (10 points)
+        if ($logement->getCity() && $logement->getCountry()) {
+            $score += 10;
+            $checks[] = ['passed' => true, 'message' => 'Complete location specified'];
+        } elseif ($logement->getCity() || $logement->getCountry()) {
+            $score += 5;
+            $suggestions[] = 'Add complete location (city and country)';
+            $checks[] = ['passed' => false, 'message' => 'Partial location specified'];
+        } else {
+            $suggestions[] = 'Add your location to attract guests';
+            $checks[] = ['passed' => false, 'message' => 'Location not specified'];
+        }
+
+        // 5. Has Property Details (10 points)
+        $hasDetails = $logement->getNumberOfRooms() || $logement->getNumberOfBeds() || 
+                      $logement->getNumberOfBathrooms() || $logement->getMaxGuests();
+        if ($hasDetails) {
+            $score += 10;
+            $checks[] = ['passed' => true, 'message' => 'Property details provided'];
+        } else {
+            $suggestions[] = 'Add property details (rooms, beds, bathrooms, guests)';
+            $checks[] = ['passed' => false, 'message' => 'Missing property details'];
+        }
+
+        // 6. Reasonable Price (5 points)
+        $price = (float) $logement->getPricePerNight();
+        if ($price > 0 && $price <= 1000) {
+            $score += 5;
+            $checks[] = ['passed' => true, 'message' => 'Price is reasonable'];
+        } elseif ($price > 1000) {
+            $score += 2;
+            $suggestions[] = 'Consider if your price is competitive';
+            $checks[] = ['passed' => false, 'message' => 'Price might be too high'];
+        } else {
+            $suggestions[] = 'Set a reasonable price for your property';
+            $checks[] = ['passed' => false, 'message' => 'Price not set'];
+        }
+
+        // 7. Recently Created (5 points)
+        $daysSinceCreation = (new \DateTime())->diff($logement->getCreatedAt())->days;
         if ($daysSinceCreation <= 30) {
             $score += 5;
             $checks[] = ['passed' => true, 'message' => 'Recently added'];

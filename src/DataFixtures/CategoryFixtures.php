@@ -4,9 +4,10 @@ namespace App\DataFixtures;
 
 use App\Entity\Category;
 use Doctrine\Bundle\FixturesBundle\Fixture;
+use Doctrine\Bundle\FixturesBundle\FixtureGroupInterface;
 use Doctrine\Persistence\ObjectManager;
 
-class CategoryFixtures extends Fixture
+class CategoryFixtures extends Fixture implements FixtureGroupInterface
 {
     public const SERVICE_CATEGORIES = [
         ['name' => 'Plumbing', 'description' => 'Plumbing and pipe services', 'icon' => 'fa-solid fa-pipe'],
@@ -28,6 +29,17 @@ class CategoryFixtures extends Fixture
         ['name' => 'Measuring Tools', 'description' => 'Levels, tape measures, and laser tools', 'icon' => 'fa-solid fa-ruler'],
         ['name' => 'Outdoor Equipment', 'description' => 'Camping and outdoor gear', 'icon' => 'fa-solid fa-campground'],
         ['name' => 'Party Equipment', 'description' => 'Tables, chairs, and party supplies', 'icon' => 'fa-solid fa-cake-candles'],
+    ];
+
+    public const LOGEMENT_CATEGORIES = [
+        ['name' => 'Entire House', 'description' => 'Complete house for rent', 'icon' => 'fa-solid fa-house'],
+        ['name' => 'Apartment', 'description' => 'Apartment or flat', 'icon' => 'fa-solid fa-building'],
+        ['name' => 'Private Room', 'description' => 'Private room in shared space', 'icon' => 'fa-solid fa-bed'],
+        ['name' => 'Shared Room', 'description' => 'Shared room accommodation', 'icon' => 'fa-solid fa-people-roof'],
+        ['name' => 'Villa', 'description' => 'Luxury villa', 'icon' => 'fa-solid fa-house-chimney'],
+        ['name' => 'Cabin', 'description' => 'Cabin or cottage', 'icon' => 'fa-solid fa-house-flag'],
+        ['name' => 'Beach House', 'description' => 'Beach front property', 'icon' => 'fa-solid fa-umbrella-beach'],
+        ['name' => 'Mountain Chalet', 'description' => 'Mountain chalet or lodge', 'icon' => 'fa-solid fa-mountain'],
     ];
 
     // Reference constants for other fixtures
@@ -74,6 +86,22 @@ class CategoryFixtures extends Fixture
             }
         }
 
+        // Create logement categories
+        foreach (self::LOGEMENT_CATEGORIES as $index => $data) {
+            $category = new Category();
+            $category->setName($data['name'])
+                ->setDescription($data['description'])
+                ->setIcon($data['icon'])
+                ->setType('logement');
+            
+            $manager->persist($category);
+        }
+
         $manager->flush();
+    }
+
+    public static function getGroups(): array
+    {
+        return ['category'];
     }
 }

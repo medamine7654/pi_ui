@@ -1,0 +1,142 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Create Logement - Host Dashboard{% endblock %}
+
+{% block body %}
+<div class="container mx-auto px-4 py-6">
+    <div class="max-w-2xl mx-auto">
+        {# Back button #}
+        <div class="mb-6">
+            <a href="{{ path('host_logements') }}" class="inline-flex items-center text-sm text-gray-600 hover:text-gray-900">
+                <svg class="h-4 w-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
+                </svg>
+                Back to My Properties
+            </a>
+        </div>
+
+        {# Page Header #}
+        <div class="mb-6">
+            <h1 class="text-3xl font-bold text-gray-900">List New Property</h1>
+            <p class="text-gray-600 mt-1">Add a new accommodation to your listings</p>
+        </div>
+
+        {# Form Card #}
+        <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+            {{ form_start(form) }}
+                <div class="space-y-6">
+                    <div>
+                        {{ form_label(form.name, null, {'label_attr': {'class': 'block text-sm font-medium text-gray-700 mb-1'}}) }}
+                        {{ form_widget(form.name, {'attr': {'class': 'w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent'}}) }}
+                        {{ form_errors(form.name) }}
+                    </div>
+
+                    <div>
+                        {{ form_label(form.description, null, {'label_attr': {'class': 'block text-sm font-medium text-gray-700 mb-1'}}) }}
+                        {{ form_widget(form.description, {'attr': {'class': 'w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent', 'rows': 4}}) }}
+                        {{ form_errors(form.description) }}
+                    </div>
+
+                    <div>
+                        {{ form_label(form.category, null, {'label_attr': {'class': 'block text-sm font-medium text-gray-700 mb-1'}}) }}
+                        {{ form_widget(form.category, {'attr': {'class': 'w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent'}}) }}
+                        {{ form_errors(form.category) }}
+                        <p class="mt-1 text-sm text-gray-500">Select the category that best describes your property</p>
+                    </div>
+
+                    <div>
+                        {{ form_label(form.pricePerNight, null, {'label_attr': {'class': 'block text-sm font-medium text-gray-700 mb-1'}}) }}
+                        {{ form_widget(form.pricePerNight, {'attr': {'class': 'w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent'}}) }}
+                        {{ form_errors(form.pricePerNight) }}
+                    </div>
+
+                    <div class="border-t pt-6">
+                        <h3 class="text-lg font-medium text-gray-900 mb-4">Location Details</h3>
+                        <div class="space-y-4">
+                            <div>
+                                {{ form_label(form.address, null, {'label_attr': {'class': 'block text-sm font-medium text-gray-700 mb-1'}}) }}
+                                {{ form_widget(form.address, {'attr': {'class': 'w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent'}}) }}
+                                {{ form_errors(form.address) }}
+                            </div>
+
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <div>
+                                    {{ form_label(form.city, null, {'label_attr': {'class': 'block text-sm font-medium text-gray-700 mb-1'}}) }}
+                                    {{ form_widget(form.city, {'attr': {'class': 'w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent'}}) }}
+                                    {{ form_errors(form.city) }}
+                                </div>
+
+                                <div>
+                                    {{ form_label(form.country, null, {'label_attr': {'class': 'block text-sm font-medium text-gray-700 mb-1'}}) }}
+                                    {{ form_widget(form.country, {'attr': {'class': 'w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent'}}) }}
+                                    {{ form_errors(form.country) }}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="border-t pt-6">
+                        <h3 class="text-lg font-medium text-gray-900 mb-4">Property Details</h3>
+                        <div class="grid grid-cols-2 md:grid-cols-3 gap-4">
+                            <div>
+                                {{ form_label(form.numberOfRooms, null, {'label_attr': {'class': 'block text-sm font-medium text-gray-700 mb-1'}}) }}
+                                {{ form_widget(form.numberOfRooms, {'attr': {'class': 'w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent'}}) }}
+                                {{ form_errors(form.numberOfRooms) }}
+                            </div>
+
+                            <div>
+                                {{ form_label(form.numberOfBeds, null, {'label_attr': {'class': 'block text-sm font-medium text-gray-700 mb-1'}}) }}
+                                {{ form_widget(form.numberOfBeds, {'attr': {'class': 'w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent'}}) }}
+                                {{ form_errors(form.numberOfBeds) }}
+                            </div>
+
+                            <div>
+                                {{ form_label(form.numberOfBathrooms, null, {'label_attr': {'class': 'block text-sm font-medium text-gray-700 mb-1'}}) }}
+                                {{ form_widget(form.numberOfBathrooms, {'attr': {'class': 'w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent'}}) }}
+                                {{ form_errors(form.numberOfBathrooms) }}
+                            </div>
+
+                            <div>
+                                {{ form_label(form.maxGuests, null, {'label_attr': {'class': 'block text-sm font-medium text-gray-700 mb-1'}}) }}
+                                {{ form_widget(form.maxGuests, {'attr': {'class': 'w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent'}}) }}
+                                {{ form_errors(form.maxGuests) }}
+                            </div>
+
+                            <div>
+                                {{ form_label(form.squareMeters, null, {'label_attr': {'class': 'block text-sm font-medium text-gray-700 mb-1'}}) }}
+                                {{ form_widget(form.squareMeters, {'attr': {'class': 'w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent'}}) }}
+                                {{ form_errors(form.squareMeters) }}
+                            </div>
+                        </div>
+                    </div>
+
+                    <div>
+                        {{ form_label(form.imageFile, 'Property Image', {'label_attr': {'class': 'block text-sm font-medium text-gray-700 mb-1'}}) }}
+                        {{ form_widget(form.imageFile, {'attr': {'class': 'w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent'}}) }}
+                        {{ form_errors(form.imageFile) }}
+                        <p class="mt-1 text-sm text-gray-500">Max 5MB. Formats: JPG, PNG, GIF</p>
+                    </div>
+
+                    <div class="bg-purple-50 border border-purple-200 rounded-md p-4">
+                        <div class="flex">
+                            <svg class="h-5 w-5 text-purple-400 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                            </svg>
+                            <p class="text-sm text-purple-700">Your property will be pending until approved by an administrator.</p>
+                        </div>
+                    </div>
+
+                    <div class="flex gap-3 pt-4">
+                        <button type="submit" class="flex-1 px-4 py-2 bg-purple-600 text-white rounded-md hover:bg-purple-700 font-medium transition-colors">
+                            List Property
+                        </button>
+                        <a href="{{ path('host_logements') }}" class="px-4 py-2 border border-gray-300 text-gray-700 rounded-md hover:bg-gray-50 font-medium transition-colors">
+                            Cancel
+                        </a>
+                    </div>
+                </div>
+            {{ form_end(form) }}
+        </div>
+    </div>
+</div>
+{% endblock %}

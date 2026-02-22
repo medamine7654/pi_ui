@@ -11,3 +11,8 @@ vich_uploader:
             uri_prefix: /uploads/tools
             upload_destination: '%kernel.project_dir%/public/uploads/tools'
             namer: Vich\UploaderBundle\Naming\SmartUniqueNamer
+            
+        logement_images:
+            uri_prefix: /uploads/logements
+            upload_destination: '%kernel.project_dir%/public/uploads/logements'
+            namer: Vich\UploaderBundle\Naming\SmartUniqueNamer

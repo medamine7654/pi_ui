@@ -35,6 +35,12 @@
             <span class="flex-1 text-sm font-medium">Matériel</span>
         </a>
         
+        <a href="{{ path('admin_logements') }}" 
+           class="flex items-center gap-3 px-3 py-2.5 rounded-lg transition-all duration-200 {% if current_route == 'admin_logements' %}bg-primary text-white{% else %}text-dark hover:bg-gray-100{% endif %}">
+            <i class="fas fa-home w-5 text-center"></i>
+            <span class="flex-1 text-sm font-medium">Logements</span>
+        </a>
+        
         <a href="{{ path('admin_category_index') }}" 
            class="flex items-center gap-3 px-3 py-2.5 rounded-lg transition-all duration-200 {% if current_route starts with 'admin_category' %}bg-primary text-white{% else %}text-dark hover:bg-gray-100{% endif %}">
             <i class="fas fa-tags w-5 text-center"></i>

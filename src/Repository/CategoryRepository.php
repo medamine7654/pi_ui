@@ -35,9 +35,10 @@ class CategoryRepository extends ServiceEntityRepository
     public function getCategoryStats(): array
     {
         return $this->createQueryBuilder('c')
-            ->select('c.id, c.name, c.type, c.icon, COUNT(DISTINCT s.id) as serviceCount, COUNT(DISTINCT t.id) as toolCount')
+            ->select('c.id, c.name, c.type, c.icon, COUNT(DISTINCT s.id) as serviceCount, COUNT(DISTINCT t.id) as toolCount, COUNT(DISTINCT l.id) as logementCount')
             ->leftJoin('c.services', 's')
             ->leftJoin('c.tools', 't')
+            ->leftJoin('c.logements', 'l')
             ->groupBy('c.id')
             ->orderBy('c.type', 'ASC')
             ->addOrderBy('c.name', 'ASC')

@@ -25,7 +25,7 @@ class Category
     private ?string $description = null;
 
     #[ORM\Column(length: 50)]
-    #[Assert\Choice(choices: ['service', 'tool'], message: 'Type must be either service or tool')]
+    #[Assert\Choice(choices: ['service', 'tool', 'logement'], message: 'Type must be either service, tool, or logement')]
     private ?string $type = null;
 
     #[ORM\Column(length: 50, nullable: true)]
@@ -40,10 +40,14 @@ class Category
     #[ORM\OneToMany(targetEntity: Tool::class, mappedBy: 'category')]
     private Collection $tools;
 
+    #[ORM\OneToMany(targetEntity: Logement::class, mappedBy: 'category')]
+    private Collection $logements;
+
     public function __construct()
     {
         $this->services = new ArrayCollection();
         $this->tools = new ArrayCollection();
+        $this->logements = new ArrayCollection();
         $this->createdAt = new \DateTimeImmutable();
     }
 
@@ -121,6 +125,14 @@ class Category
     public function getTools(): Collection
     {
         return $this->tools;
+    }
+
+    /**
+     * @return Collection<int, Logement>
+     */
+    public function getLogements(): Collection
+    {
+        return $this->logements;
     }
 
     public function __toString(): string

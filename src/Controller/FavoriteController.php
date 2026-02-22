@@ -4,6 +4,7 @@ namespace App\Controller;
 
 use App\Entity\Favorite;
 use App\Repository\FavoriteRepository;
+use App\Repository\LogementRepository;
 use App\Repository\ServiceRepository;
 use App\Repository\ToolRepository;
 use Doctrine\ORM\EntityManagerInterface;
@@ -19,13 +20,15 @@ class FavoriteController extends AbstractController
     public function index(
         FavoriteRepository $favoriteRepository,
         ServiceRepository $serviceRepository,
-        ToolRepository $toolRepository
+        ToolRepository $toolRepository,
+        LogementRepository $logementRepository
     ): Response {
         $user = $this->getUser();
         $favorites = $favoriteRepository->findByUser($user);
 
         $services = [];
         $tools = [];
+        $logements = [];
 
         foreach ($favorites as $favorite) {
             if ($favorite->getItemType() === 'service') {
@@ -38,12 +41,18 @@ class FavoriteController extends AbstractController
                 if ($tool && $tool->getIsActive()) {
                     $tools[] = $tool;
                 }
+            } elseif ($favorite->getItemType() === 'logement') {
+                $logement = $logementRepository->find($favorite->getItemId());
+                if ($logement && $logement->getIsActive()) {
+                    $logements[] = $logement;
+                }
             }
         }
 
         return $this->render('favorites/index.html.twig', [
             'services' => $services,
             'tools' => $tools,
+            'logements' => $logements,
         ]);
     }
 
@@ -56,7 +65,7 @@ class FavoriteController extends AbstractController
     ): Response {
         $user = $this->getUser();
 
-        if (!in_array($type, ['service', 'tool'])) {
+        if (!in_array($type, ['service', 'tool', 'logement'])) {
             throw $this->createNotFoundException('Invalid item type');
         }
 
