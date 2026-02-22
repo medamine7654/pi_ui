@@ -6,6 +6,7 @@ use App\Form\SearchFilterType;
 use App\Repository\FavoriteRepository;
 use App\Repository\LogementRepository;
 use App\Service\QualityScoreService;
+use App\Service\RecommendationService;
 use Knp\Component\Pager\PaginatorInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
@@ -75,8 +76,12 @@ class LogementController extends AbstractController
     }
 
     #[Route('/logements/{id}', name: 'app_logement_show')]
-    public function show(int $id, LogementRepository $logementRepository, QualityScoreService $qualityScoreService): Response
-    {
+    public function show(
+        int $id, 
+        LogementRepository $logementRepository, 
+        QualityScoreService $qualityScoreService,
+        RecommendationService $recommendationService
+    ): Response {
         $logement = $logementRepository->find($id);
 
         if (!$logement || !$logement->getIsActive()) {
@@ -84,10 +89,12 @@ class LogementController extends AbstractController
         }
 
         $qualityScore = $qualityScoreService->calculateLogementScore($logement);
+        $recommendations = $recommendationService->getLogementRecommendations($logement, 3);
 
         return $this->render('logements/show.html.twig', [
             'logement' => $logement,
             'qualityScore' => $qualityScore,
+            'recommendations' => $recommendations,
         ]);
     }
 }

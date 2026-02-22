@@ -6,6 +6,7 @@ use App\Form\SearchFilterType;
 use App\Repository\FavoriteRepository;
 use App\Repository\ToolRepository;
 use App\Service\QualityScoreService;
+use App\Service\RecommendationService;
 use Knp\Component\Pager\PaginatorInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
@@ -75,8 +76,12 @@ class ToolController extends AbstractController
     }
 
     #[Route('/tools/{id}', name: 'app_tool_show')]
-    public function show(int $id, ToolRepository $toolRepository, QualityScoreService $qualityScoreService): Response
-    {
+    public function show(
+        int $id, 
+        ToolRepository $toolRepository, 
+        QualityScoreService $qualityScoreService,
+        RecommendationService $recommendationService
+    ): Response {
         $tool = $toolRepository->find($id);
 
         if (!$tool || !$tool->getIsActive()) {
@@ -84,10 +89,12 @@ class ToolController extends AbstractController
         }
 
         $qualityScore = $qualityScoreService->calculateToolScore($tool);
+        $recommendations = $recommendationService->getToolRecommendations($tool, 3);
 
         return $this->render('tools/show.html.twig', [
             'tool' => $tool,
             'qualityScore' => $qualityScore,
+            'recommendations' => $recommendations,
         ]);
     }
 }

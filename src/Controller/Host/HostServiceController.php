@@ -5,6 +5,8 @@ namespace App\Controller\Host;
 use App\Entity\Service;
 use App\Form\ServiceType;
 use App\Repository\ServiceRepository;
+use App\Repository\CategoryRepository;
+use App\Service\PriceSuggestionService;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
@@ -27,7 +29,7 @@ class HostServiceController extends AbstractController
     }
 
     #[Route('/new', name: 'host_service_new')]
-    public function new(Request $request, EntityManagerInterface $em): Response
+    public function new(Request $request, EntityManagerInterface $em, PriceSuggestionService $priceSuggestionService, CategoryRepository $categoryRepository): Response
     {
         $service = new Service();
         $form = $this->createForm(ServiceType::class, $service);
@@ -51,8 +53,19 @@ class HostServiceController extends AbstractController
             return $this->redirectToRoute('host_services');
         }
 
+        // Pre-calculate price suggestions for all service categories
+        $priceSuggestions = [];
+        $serviceCategories = $categoryRepository->findByType('service');
+        foreach ($serviceCategories as $category) {
+            $suggestion = $priceSuggestionService->getServicePriceSuggestion($category);
+            if ($suggestion) {
+                $priceSuggestions[$category->getId()] = $suggestion;
+            }
+        }
+        
         return $this->render('host/services/new.html.twig', [
             'form' => $form->createView(),
+            'priceSuggestions' => $priceSuggestions,
         ]);
     }
 

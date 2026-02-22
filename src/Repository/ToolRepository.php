@@ -112,4 +112,66 @@ class ToolRepository extends ServiceEntityRepository
 
         return $qb;
     }
+
+    /**
+     * Find similar tools using AI-powered recommendation algorithm
+     * Scoring: Category match (50%) + Price range ±25% (30%) + Location match (20%)
+     */
+    public function findSimilar(Tool $tool, int $limit = 3): array
+    {
+        $categoryId = $tool->getCategory()?->getId();
+        $price = $tool->getPricePerDay();
+        $location = $tool->getLocation();
+        
+        // Calculate price range (±25%)
+        $minPrice = $price * 0.75;
+        $maxPrice = $price * 1.25;
+
+        $qb = $this->createQueryBuilder('t')
+            ->where('t.id != :currentId')
+            ->andWhere('t.isActive = :active')
+            ->setParameter('currentId', $tool->getId())
+            ->setParameter('active', true);
+
+        // If category exists, prioritize same category
+        if ($categoryId) {
+            $qb->andWhere('t.category = :category')
+               ->setParameter('category', $tool->getCategory());
+        }
+
+        // Add scoring logic
+        $qb->addSelect('
+            (CASE WHEN t.category = :categoryParam THEN 50 ELSE 0 END) +
+            (CASE WHEN t.pricePerDay BETWEEN :minPrice AND :maxPrice THEN 30 ELSE 0 END) +
+            (CASE WHEN t.location = :location THEN 20 ELSE 0 END) as HIDDEN score
+        ')
+        ->setParameter('categoryParam', $tool->getCategory())
+        ->setParameter('minPrice', $minPrice)
+        ->setParameter('maxPrice', $maxPrice)
+        ->setParameter('location', $location)
+        ->orderBy('score', 'DESC')
+        ->addOrderBy('t.createdAt', 'DESC')
+        ->setMaxResults($limit);
+
+        return $qb->getQuery()->getResult();
+    }
+
+    /**
+     * Get all prices for tools in a specific category
+     * Used for price suggestion algorithm
+     */
+    public function getPricesByCategory(\App\Entity\Category $category): array
+    {
+        $results = $this->createQueryBuilder('t')
+            ->select('t.pricePerDay')
+            ->where('t.category = :category')
+            ->andWhere('t.isActive = :active')
+            ->setParameter('category', $category)
+            ->setParameter('active', true)
+            ->getQuery()
+            ->getResult();
+
+        // Extract prices from result array
+        return array_map(fn($item) => (float) $item['pricePerDay'], $results);
+    }
 }

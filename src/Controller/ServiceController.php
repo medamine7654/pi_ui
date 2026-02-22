@@ -6,6 +6,7 @@ use App\Form\SearchFilterType;
 use App\Repository\FavoriteRepository;
 use App\Repository\ServiceRepository;
 use App\Service\QualityScoreService;
+use App\Service\RecommendationService;
 use Knp\Component\Pager\PaginatorInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
@@ -75,8 +76,12 @@ class ServiceController extends AbstractController
     }
 
     #[Route('/services/{id}', name: 'app_service_show')]
-    public function show(int $id, ServiceRepository $serviceRepository, QualityScoreService $qualityScoreService): Response
-    {
+    public function show(
+        int $id, 
+        ServiceRepository $serviceRepository, 
+        QualityScoreService $qualityScoreService,
+        RecommendationService $recommendationService
+    ): Response {
         $service = $serviceRepository->find($id);
 
         if (!$service || !$service->getIsActive()) {
@@ -84,10 +89,12 @@ class ServiceController extends AbstractController
         }
 
         $qualityScore = $qualityScoreService->calculateServiceScore($service);
+        $recommendations = $recommendationService->getServiceRecommendations($service, 3);
 
         return $this->render('services/show.html.twig', [
             'service' => $service,
             'qualityScore' => $qualityScore,
+            'recommendations' => $recommendations,
         ]);
     }
 }

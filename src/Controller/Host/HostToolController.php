@@ -5,6 +5,8 @@ namespace App\Controller\Host;
 use App\Entity\Tool;
 use App\Form\ToolType;
 use App\Repository\ToolRepository;
+use App\Repository\CategoryRepository;
+use App\Service\PriceSuggestionService;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
@@ -27,7 +29,7 @@ class HostToolController extends AbstractController
     }
 
     #[Route('/new', name: 'host_tool_new')]
-    public function new(Request $request, EntityManagerInterface $em): Response
+    public function new(Request $request, EntityManagerInterface $em, PriceSuggestionService $priceSuggestionService, CategoryRepository $categoryRepository): Response
     {
         $tool = new Tool();
         $form = $this->createForm(ToolType::class, $tool);
@@ -51,8 +53,19 @@ class HostToolController extends AbstractController
             return $this->redirectToRoute('host_tools');
         }
 
+        // Pre-calculate price suggestions for all tool categories
+        $priceSuggestions = [];
+        $toolCategories = $categoryRepository->findByType('tool');
+        foreach ($toolCategories as $category) {
+            $suggestion = $priceSuggestionService->getToolPriceSuggestion($category);
+            if ($suggestion) {
+                $priceSuggestions[$category->getId()] = $suggestion;
+            }
+        }
+
         return $this->render('host/tools/new.html.twig', [
             'form' => $form->createView(),
+            'priceSuggestions' => $priceSuggestions,
         ]);
     }
 

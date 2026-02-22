@@ -5,6 +5,8 @@ namespace App\Controller\Host;
 use App\Entity\Logement;
 use App\Form\LogementType;
 use App\Repository\LogementRepository;
+use App\Repository\CategoryRepository;
+use App\Service\PriceSuggestionService;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
@@ -27,7 +29,7 @@ class HostLogementController extends AbstractController
     }
 
     #[Route('/new', name: 'host_logement_new')]
-    public function new(Request $request, EntityManagerInterface $em): Response
+    public function new(Request $request, EntityManagerInterface $em, PriceSuggestionService $priceSuggestionService, CategoryRepository $categoryRepository): Response
     {
         $logement = new Logement();
         $form = $this->createForm(LogementType::class, $logement);
@@ -51,8 +53,19 @@ class HostLogementController extends AbstractController
             return $this->redirectToRoute('host_logements');
         }
 
+        // Pre-calculate price suggestions for all logement categories
+        $priceSuggestions = [];
+        $logementCategories = $categoryRepository->findByType('logement');
+        foreach ($logementCategories as $category) {
+            $suggestion = $priceSuggestionService->getLogementPriceSuggestion($category);
+            if ($suggestion) {
+                $priceSuggestions[$category->getId()] = $suggestion;
+            }
+        }
+
         return $this->render('host/logements/new.html.twig', [
             'form' => $form->createView(),
+            'priceSuggestions' => $priceSuggestions,
         ]);
     }
 

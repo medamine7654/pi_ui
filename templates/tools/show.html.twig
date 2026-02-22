@@ -99,6 +99,44 @@
                 </div>
             </div>
         </div>
+
+        {# AI-Powered Recommendations Section #}
+        {% if recommendations|length > 0 %}
+            <div class="mt-8">
+                <div class="flex items-center gap-2 mb-4">
+                    <i class="fas fa-lightbulb text-purple-600 text-xl"></i>
+                    <h2 class="text-2xl font-bold text-gray-900">Recommended for You</h2>
+                    <span class="text-xs bg-gradient-to-r from-purple-500 to-pink-500 text-white px-3 py-1 rounded-full font-medium">AI Powered</span>
+                </div>
+                
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                    {% for recommendedTool in recommendations %}
+                        <a href="{{ path('app_tool_show', {id: recommendedTool.id}) }}" class="group">
+                            <div class="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden hover:shadow-md transition-shadow">
+                                <div class="h-48 bg-gradient-to-br from-purple-100 to-purple-200 flex items-center justify-center">
+                                    <i class="fas fa-wrench text-purple-400 text-6xl"></i>
+                                </div>
+                                <div class="p-4">
+                                    <h3 class="font-semibold text-gray-900 mb-2 group-hover:text-purple-600 transition-colors">
+                                        {{ recommendedTool.name }}
+                                    </h3>
+                                    {% if recommendedTool.category %}
+                                        <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-purple-100 text-purple-800 mb-2">
+                                            <i class="{{ recommendedTool.category.icon }} mr-1"></i>
+                                            {{ recommendedTool.category.name }}
+                                        </span>
+                                    {% endif %}
+                                    <div class="flex items-center justify-between mt-3">
+                                        <span class="text-2xl font-bold text-purple-600">€{{ recommendedTool.pricePerDay }}</span>
+                                        <span class="text-sm text-gray-500">per day</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </a>
+                    {% endfor %}
+                </div>
+            </div>
+        {% endif %}
     </div>
 </div>
 {% endblock %}
