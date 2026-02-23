@@ -5,6 +5,8 @@ namespace App\Controller\Host;
 use App\Entity\Service;
 use App\Form\ServiceType;
 use App\Repository\ServiceRepository;
+use App\Repository\CategoryRepository;
+use App\Service\PriceSuggestionService;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
@@ -27,7 +29,7 @@ class HostServiceController extends AbstractController
     }
 
     #[Route('/new', name: 'host_service_new')]
-    public function new(Request $request, EntityManagerInterface $em): Response
+    public function new(Request $request, EntityManagerInterface $em, PriceSuggestionService $priceSuggestionService, CategoryRepository $categoryRepository): Response
     {
         $service = new Service();
         $form = $this->createForm(ServiceType::class, $service);
@@ -35,17 +37,35 @@ class HostServiceController extends AbstractController
 
         if ($form->isSubmitted() && $form->isValid()) {
             $service->setHost($this->getUser());
-            $service->setIsActive(false);
+            
+            // Auto-approve if user is admin, otherwise needs approval
+            if ($this->isGranted('ROLE_ADMIN')) {
+                $service->setIsActive(true);
+                $this->addFlash('success', 'Service created and published successfully!');
+            } else {
+                $service->setIsActive(false);
+                $this->addFlash('success', 'Service created successfully! Waiting for admin approval.');
+            }
 
             $em->persist($service);
             $em->flush();
 
-            $this->addFlash('success', 'Service created successfully! Waiting for admin approval.');
             return $this->redirectToRoute('host_services');
         }
 
+        // Pre-calculate price suggestions for all service categories
+        $priceSuggestions = [];
+        $serviceCategories = $categoryRepository->findByType('service');
+        foreach ($serviceCategories as $category) {
+            $suggestion = $priceSuggestionService->getServicePriceSuggestion($category);
+            if ($suggestion) {
+                $priceSuggestions[$category->getId()] = $suggestion;
+            }
+        }
+        
         return $this->render('host/services/new.html.twig', [
             'form' => $form->createView(),
+            'priceSuggestions' => $priceSuggestions,
         ]);
     }
 

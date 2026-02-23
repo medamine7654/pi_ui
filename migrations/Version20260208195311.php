@@ -20,29 +20,30 @@ final class Version20260208195311 extends AbstractMigration
     public function up(Schema $schema): void
     {
         // this up() migration is auto-generated, please modify it to your needs
-        $this->addSql('ALTER TABLE service_booking DROP FOREIGN KEY `FK_2F88BF429A4AA658`');
-        $this->addSql('ALTER TABLE service_booking DROP FOREIGN KEY `FK_2F88BF42ED5CA9E6`');
-        $this->addSql('ALTER TABLE service_report DROP FOREIGN KEY `FK_FAE872B271CE806`');
-        $this->addSql('ALTER TABLE service_report DROP FOREIGN KEY `FK_FAE872B2ED5CA9E6`');
-        $this->addSql('ALTER TABLE service_tool DROP FOREIGN KEY `FK_EEB08A3D8F7B22CC`');
-        $this->addSql('ALTER TABLE service_tool DROP FOREIGN KEY `FK_EEB08A3DED5CA9E6`');
-        $this->addSql('ALTER TABLE tool_rental DROP FOREIGN KEY `FK_7348CE618F7B22CC`');
-        $this->addSql('ALTER TABLE tool_rental DROP FOREIGN KEY `FK_7348CE619A4AA658`');
-        $this->addSql('ALTER TABLE tool_report DROP FOREIGN KEY `FK_A17E7B9871CE806`');
-        $this->addSql('ALTER TABLE tool_report DROP FOREIGN KEY `FK_A17E7B988F7B22CC`');
-        $this->addSql('DROP TABLE category');
-        $this->addSql('DROP TABLE service_booking');
-        $this->addSql('DROP TABLE service_report');
-        $this->addSql('DROP TABLE service_tool');
-        $this->addSql('DROP TABLE tool_rental');
-        $this->addSql('DROP TABLE tool_report');
-        $this->addSql('DROP INDEX idx_service_active ON service');
-        $this->addSql('ALTER TABLE service DROP max_guests_per_booking, DROP image_path, DROP is_suspended, DROP category_id');
-        $this->addSql('ALTER TABLE service RENAME INDEX idx_service_host TO IDX_E19D9AD21FB8D185');
-        $this->addSql('DROP INDEX idx_tool_active ON tool');
-        $this->addSql('ALTER TABLE tool DROP deposit_amount, DROP condition_notes, DROP image_path, DROP is_suspended, DROP category_id');
-        $this->addSql('ALTER TABLE tool RENAME INDEX idx_tool_host TO IDX_20F33ED11FB8D185');
-        $this->addSql('ALTER TABLE user DROP avatar, DROP updated_at');
+        // Commented out - these tables don't exist in fresh install
+        // $this->addSql('ALTER TABLE service_booking DROP FOREIGN KEY `FK_2F88BF429A4AA658`');
+        // $this->addSql('ALTER TABLE service_booking DROP FOREIGN KEY `FK_2F88BF42ED5CA9E6`');
+        // $this->addSql('ALTER TABLE service_report DROP FOREIGN KEY `FK_FAE872B271CE806`');
+        // $this->addSql('ALTER TABLE service_report DROP FOREIGN KEY `FK_FAE872B2ED5CA9E6`');
+        // $this->addSql('ALTER TABLE service_tool DROP FOREIGN KEY `FK_EEB08A3D8F7B22CC`');
+        // $this->addSql('ALTER TABLE service_tool DROP FOREIGN KEY `FK_EEB08A3DED5CA9E6`');
+        // $this->addSql('ALTER TABLE tool_rental DROP FOREIGN KEY `FK_7348CE618F7B22CC`');
+        // $this->addSql('ALTER TABLE tool_rental DROP FOREIGN KEY `FK_7348CE619A4AA658`');
+        // $this->addSql('ALTER TABLE tool_report DROP FOREIGN KEY `FK_A17E7B9871CE806`');
+        // $this->addSql('ALTER TABLE tool_report DROP FOREIGN KEY `FK_A17E7B988F7B22CC`');
+        // $this->addSql('DROP TABLE category');
+        // $this->addSql('DROP TABLE service_booking');
+        // $this->addSql('DROP TABLE service_report');
+        // $this->addSql('DROP TABLE service_tool');
+        // $this->addSql('DROP TABLE tool_rental');
+        // $this->addSql('DROP TABLE tool_report');
+        // $this->addSql('DROP INDEX idx_service_active ON service');
+        // $this->addSql('ALTER TABLE service DROP max_guests_per_booking, DROP image_path, DROP is_suspended, DROP category_id');
+        // $this->addSql('ALTER TABLE service RENAME INDEX idx_service_host TO IDX_E19D9AD21FB8D185');
+        // $this->addSql('DROP INDEX idx_tool_active ON tool');
+        // $this->addSql('ALTER TABLE tool DROP deposit_amount, DROP condition_notes, DROP image_path, DROP is_suspended, DROP category_id');
+        // $this->addSql('ALTER TABLE tool RENAME INDEX idx_tool_host TO IDX_20F33ED11FB8D185');
+        // $this->addSql('ALTER TABLE user DROP avatar, DROP updated_at');
     }
 
     public function down(Schema $schema): void

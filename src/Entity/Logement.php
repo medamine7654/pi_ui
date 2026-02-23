@@ -3,14 +3,15 @@
 namespace App\Entity;
 
 use App\Repository\LogementRepository;
-use Doctrine\Common\Collections\ArrayCollection;
-use Doctrine\Common\Collections\Collection;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Component\HttpFoundation\File\File;
 use Symfony\Component\Validator\Constraints as Assert;
+use Vich\UploaderBundle\Mapping\Annotation as Vich;
 
 #[ORM\Entity(repositoryClass: LogementRepository::class)]
 #[ORM\HasLifecycleCallbacks]
+#[Vich\Uploadable]
 class Logement
 {
     #[ORM\Id]
@@ -18,67 +19,45 @@ class Logement
     #[ORM\Column]
     private ?int $id = null;
 
-    #[ORM\Column(length: 255)]
-    #[Assert\NotBlank(message: "Title is required")]
-    #[Assert\Length(
-        min: 5,
-        max: 255,
-        minMessage: "Title must be at least {{ limit }} characters long",
-        maxMessage: "Title cannot be longer than {{ limit }} characters"
-    )]
-    private ?string $title = null;
-
-    #[ORM\Column(type: Types::TEXT)]
-    #[Assert\NotBlank(message: "Description is required")]
-    #[Assert\Length(
-        min: 20,
-        minMessage: "Description must be at least {{ limit }} characters long"
-    )]
-    private ?string $description = null;
-
-    #[ORM\Column(type: Types::DECIMAL, precision: 10, scale: 2)]
-    #[Assert\NotBlank(message: "Price is required")]
-    #[Assert\Positive(message: "Price must be positive")]
-    private ?string $price = null;
+    #[ORM\ManyToOne(targetEntity: User::class)]
+    #[ORM\JoinColumn(nullable: false)]
+    private ?User $host = null;
 
     #[ORM\Column(length: 255)]
-    #[Assert\NotBlank(message: "Address is required")]
-    private ?string $address = null;
-
-    #[ORM\Column(length: 100)]
-    #[Assert\NotBlank(message: "City is required")]
-    private ?string $city = null;
-
-    #[ORM\Column(length: 100)]
-    #[Assert\NotBlank(message: "Country is required")]
-    private ?string $country = null;
-
-    #[ORM\Column]
-    private ?int $capacity = 1;
-
-    #[ORM\Column]
-    private ?int $bedrooms = 1;
-
-    #[ORM\Column]
-    private ?int $bathrooms = 1;
-
-    /**
-     * Store image URLs instead of BLOB (as per requirements)
-     */
-    #[ORM\Column(type: Types::JSON)]
-    private array $imageUrls = [];
-
-    #[ORM\Column]
-    private ?bool $isAvailable = true;
-
-    #[ORM\Column]
-    private ?bool $isApproved = true;
-
-    #[ORM\Column]
-    private ?bool $isReported = false;
+    private ?string $name = null;
 
     #[ORM\Column(type: Types::TEXT, nullable: true)]
-    private ?string $reportReason = null;
+    private ?string $description = null;
+
+    #[ORM\Column(length: 255, nullable: true)]
+    private ?string $address = null;
+
+    #[ORM\Column(length: 100, nullable: true)]
+    private ?string $city = null;
+
+    #[ORM\Column(length: 100, nullable: true)]
+    private ?string $country = null;
+
+    #[ORM\Column(type: Types::DECIMAL, precision: 10, scale: 2)]
+    private ?string $pricePerNight = null;
+
+    #[ORM\Column(nullable: true)]
+    private ?int $numberOfRooms = null;
+
+    #[ORM\Column(nullable: true)]
+    private ?int $numberOfBeds = null;
+
+    #[ORM\Column(nullable: true)]
+    private ?int $numberOfBathrooms = null;
+
+    #[ORM\Column(nullable: true)]
+    private ?int $maxGuests = null;
+
+    #[ORM\Column(nullable: true)]
+    private ?int $squareMeters = null;
+
+    #[ORM\Column]
+    private ?bool $isActive = false;
 
     #[ORM\Column]
     private ?\DateTimeImmutable $createdAt = null;
@@ -86,30 +65,29 @@ class Logement
     #[ORM\Column]
     private ?\DateTimeImmutable $updatedAt = null;
 
-    #[ORM\ManyToOne(inversedBy: 'logements')]
-    #[ORM\JoinColumn(nullable: false)]
+    #[ORM\ManyToOne(targetEntity: Category::class, inversedBy: 'logements')]
+    #[ORM\JoinColumn(nullable: true)]
     private ?Category $category = null;
 
-    #[ORM\ManyToOne(inversedBy: 'logements')]
-    #[ORM\JoinColumn(nullable: false)]
-    private ?User $host = null;
+    #[Vich\UploadableField(mapping: 'logement_images', fileNameProperty: 'imageName', size: 'imageSize')]
+    #[Assert\File(
+        maxSize: '5M',
+        mimeTypes: ['image/jpeg', 'image/png', 'image/gif'],
+        mimeTypesMessage: 'Please upload a valid image (JPG, PNG, or GIF)'
+    )]
+    private ?File $imageFile = null;
 
-    #[ORM\OneToMany(targetEntity: Reservation::class, mappedBy: 'logement')]
-    private Collection $reservations;
+    #[ORM\Column(length: 255, nullable: true)]
+    private ?string $imageName = null;
 
-    #[ORM\OneToMany(targetEntity: Review::class, mappedBy: 'logement')]
-    private Collection $reviews;
+    #[ORM\Column(nullable: true)]
+    private ?int $imageSize = null;
 
-    #[ORM\Column(type: Types::DECIMAL, precision: 9, scale: 6, nullable: true)]
-    private ?string $latitude = null;
-
-    #[ORM\Column(type: Types::DECIMAL, precision: 9, scale: 6, nullable: true)]
-    private ?string $longitude = null;
+    #[ORM\Column(nullable: true)]
+    private ?\DateTimeImmutable $imageUpdatedAt = null;
 
     public function __construct()
     {
-        $this->reservations = new ArrayCollection();
-        $this->reviews = new ArrayCollection();
         $this->createdAt = new \DateTimeImmutable();
         $this->updatedAt = new \DateTimeImmutable();
     }
@@ -120,214 +98,9 @@ class Logement
         $this->updatedAt = new \DateTimeImmutable();
     }
 
-    // Getters and Setters
     public function getId(): ?int
     {
         return $this->id;
-    }
-
-    public function getTitle(): ?string
-    {
-        return $this->title;
-    }
-
-    public function setTitle(string $title): static
-    {
-        $this->title = $title;
-        return $this;
-    }
-
-    public function getDescription(): ?string
-    {
-        return $this->description;
-    }
-
-    public function setDescription(string $description): static
-    {
-        $this->description = $description;
-        return $this;
-    }
-
-    public function getPrice(): ?string
-    {
-        return $this->price;
-    }
-
-    public function setPrice(string $price): static
-    {
-        $this->price = $price;
-        return $this;
-    }
-
-    public function getAddress(): ?string
-    {
-        return $this->address;
-    }
-
-    public function setAddress(string $address): static
-    {
-        $this->address = $address;
-        return $this;
-    }
-
-    public function getCity(): ?string
-    {
-        return $this->city;
-    }
-
-    public function setCity(string $city): static
-    {
-        $this->city = $city;
-        return $this;
-    }
-
-    public function getCountry(): ?string
-    {
-        return $this->country;
-    }
-
-    public function setCountry(string $country): static
-    {
-        $this->country = $country;
-        return $this;
-    }
-
-    public function getCapacity(): ?int
-    {
-        return $this->capacity;
-    }
-
-    public function setCapacity(int $capacity): static
-    {
-        $this->capacity = $capacity;
-        return $this;
-    }
-
-    public function getBedrooms(): ?int
-    {
-        return $this->bedrooms;
-    }
-
-    public function setBedrooms(int $bedrooms): static
-    {
-        $this->bedrooms = $bedrooms;
-        return $this;
-    }
-
-    public function getBathrooms(): ?int
-    {
-        return $this->bathrooms;
-    }
-
-    public function setBathrooms(int $bathrooms): static
-    {
-        $this->bathrooms = $bathrooms;
-        return $this;
-    }
-
-    public function getImageUrls(): array
-    {
-        return $this->imageUrls;
-    }
-
-    public function setImageUrls(array $imageUrls): static
-    {
-        $this->imageUrls = $imageUrls;
-        return $this;
-    }
-
-    public function addImageUrl(string $imageUrl): static
-    {
-        if (!in_array($imageUrl, $this->imageUrls, true)) {
-            $this->imageUrls[] = $imageUrl;
-        }
-        return $this;
-    }
-
-    public function removeImageUrl(string $imageUrl): static
-    {
-        if (($key = array_search($imageUrl, $this->imageUrls, true)) !== false) {
-            unset($this->imageUrls[$key]);
-            $this->imageUrls = array_values($this->imageUrls);
-        }
-        return $this;
-    }
-
-    public function isAvailable(): ?bool
-    {
-        return $this->isAvailable;
-    }
-
-    public function setAvailable(bool $isAvailable): static
-    {
-        $this->isAvailable = $isAvailable;
-        return $this;
-    }
-
-    public function isApproved(): ?bool
-    {
-        return $this->isApproved;
-    }
-
-    public function setApproved(bool $isApproved): static
-    {
-        $this->isApproved = $isApproved;
-        return $this;
-    }
-
-    public function isReported(): ?bool
-    {
-        return $this->isReported;
-    }
-
-    public function setReported(bool $isReported): static
-    {
-        $this->isReported = $isReported;
-        return $this;
-    }
-
-    public function getReportReason(): ?string
-    {
-        return $this->reportReason;
-    }
-
-    public function setReportReason(?string $reportReason): static
-    {
-        $this->reportReason = $reportReason;
-        return $this;
-    }
-
-    public function getCreatedAt(): ?\DateTimeImmutable
-    {
-        return $this->createdAt;
-    }
-
-    public function setCreatedAt(\DateTimeImmutable $createdAt): static
-    {
-        $this->createdAt = $createdAt;
-        return $this;
-    }
-
-    public function getUpdatedAt(): ?\DateTimeImmutable
-    {
-        return $this->updatedAt;
-    }
-
-    public function setUpdatedAt(\DateTimeImmutable $updatedAt): static
-    {
-        $this->updatedAt = $updatedAt;
-        return $this;
-    }
-
-    public function getCategory(): ?Category
-    {
-        return $this->category;
-    }
-
-    public function setCategory(?Category $category): static
-    {
-        $this->category = $category;
-        return $this;
     }
 
     public function getHost(): ?User
@@ -341,106 +114,206 @@ class Logement
         return $this;
     }
 
-    /**
-     * @return Collection<int, Reservation>
-     */
-    public function getReservations(): Collection
+    public function getName(): ?string
     {
-        return $this->reservations;
+        return $this->name;
     }
 
-    public function addReservation(Reservation $reservation): static
+    public function setName(string $name): static
     {
-        if (!$this->reservations->contains($reservation)) {
-            $this->reservations->add($reservation);
-            $reservation->setLogement($this);
+        $this->name = $name;
+        return $this;
+    }
+
+    public function getDescription(): ?string
+    {
+        return $this->description;
+    }
+
+    public function setDescription(?string $description): static
+    {
+        $this->description = $description;
+        return $this;
+    }
+
+    public function getAddress(): ?string
+    {
+        return $this->address;
+    }
+
+    public function setAddress(?string $address): static
+    {
+        $this->address = $address;
+        return $this;
+    }
+
+    public function getCity(): ?string
+    {
+        return $this->city;
+    }
+
+    public function setCity(?string $city): static
+    {
+        $this->city = $city;
+        return $this;
+    }
+
+    public function getCountry(): ?string
+    {
+        return $this->country;
+    }
+
+    public function setCountry(?string $country): static
+    {
+        $this->country = $country;
+        return $this;
+    }
+
+    public function getPricePerNight(): ?string
+    {
+        return $this->pricePerNight;
+    }
+
+    public function setPricePerNight(string $pricePerNight): static
+    {
+        $this->pricePerNight = $pricePerNight;
+        return $this;
+    }
+
+    public function getNumberOfRooms(): ?int
+    {
+        return $this->numberOfRooms;
+    }
+
+    public function setNumberOfRooms(?int $numberOfRooms): static
+    {
+        $this->numberOfRooms = $numberOfRooms;
+        return $this;
+    }
+
+    public function getNumberOfBeds(): ?int
+    {
+        return $this->numberOfBeds;
+    }
+
+    public function setNumberOfBeds(?int $numberOfBeds): static
+    {
+        $this->numberOfBeds = $numberOfBeds;
+        return $this;
+    }
+
+    public function getNumberOfBathrooms(): ?int
+    {
+        return $this->numberOfBathrooms;
+    }
+
+    public function setNumberOfBathrooms(?int $numberOfBathrooms): static
+    {
+        $this->numberOfBathrooms = $numberOfBathrooms;
+        return $this;
+    }
+
+    public function getMaxGuests(): ?int
+    {
+        return $this->maxGuests;
+    }
+
+    public function setMaxGuests(?int $maxGuests): static
+    {
+        $this->maxGuests = $maxGuests;
+        return $this;
+    }
+
+    public function getSquareMeters(): ?int
+    {
+        return $this->squareMeters;
+    }
+
+    public function setSquareMeters(?int $squareMeters): static
+    {
+        $this->squareMeters = $squareMeters;
+        return $this;
+    }
+
+    public function getIsActive(): ?bool
+    {
+        return $this->isActive;
+    }
+
+    public function setIsActive(bool $isActive): static
+    {
+        $this->isActive = $isActive;
+        return $this;
+    }
+
+    public function getCreatedAt(): ?\DateTimeImmutable
+    {
+        return $this->createdAt;
+    }
+
+    public function getUpdatedAt(): ?\DateTimeImmutable
+    {
+        return $this->updatedAt;
+    }
+
+    public function getCategory(): ?Category
+    {
+        return $this->category;
+    }
+
+    public function setCategory(?Category $category): static
+    {
+        $this->category = $category;
+        return $this;
+    }
+
+    public function setImageFile(?File $imageFile = null): void
+    {
+        $this->imageFile = $imageFile;
+
+        if (null !== $imageFile) {
+            $this->imageUpdatedAt = new \DateTimeImmutable();
         }
-        return $this;
     }
 
-    public function removeReservation(Reservation $reservation): static
+    public function getImageFile(): ?File
     {
-        if ($this->reservations->removeElement($reservation)) {
-            // set the owning side to null (unless already changed)
-            if ($reservation->getLogement() === $this) {
-                $reservation->setLogement(null);
-            }
-        }
-        return $this;
+        return $this->imageFile;
     }
 
-    /**
-     * @return Collection<int, Review>
-     */
-    public function getReviews(): Collection
+    public function setImageName(?string $imageName): void
     {
-        return $this->reviews;
+        $this->imageName = $imageName;
     }
 
-    public function addReview(Review $review): static
+    public function getImageName(): ?string
     {
-        if (!$this->reviews->contains($review)) {
-            $this->reviews->add($review);
-            $review->setLogement($this);
-        }
-        return $this;
+        return $this->imageName;
     }
 
-    public function removeReview(Review $review): static
+    public function setImageSize(?int $imageSize): void
     {
-        if ($this->reviews->removeElement($review)) {
-            // set the owning side to null (unless already changed)
-            if ($review->getLogement() === $this) {
-                $review->setLogement(null);
-            }
-        }
-        return $this;
+        $this->imageSize = $imageSize;
     }
 
-    public function getLatitude(): ?string
+    public function getImageSize(): ?int
     {
-        return $this->latitude;
+        return $this->imageSize;
     }
 
-    public function setLatitude(?string $latitude): static
+    public function getImageUpdatedAt(): ?\DateTimeImmutable
     {
-        $this->latitude = $latitude;
-        return $this;
+        return $this->imageUpdatedAt;
     }
 
-    public function getLongitude(): ?string
+    public function setImageUpdatedAt(?\DateTimeImmutable $imageUpdatedAt): void
     {
-        return $this->longitude;
+        $this->imageUpdatedAt = $imageUpdatedAt;
     }
 
-    public function setLongitude(?string $longitude): static
-    {
-        $this->longitude = $longitude;
-        return $this;
-    }
-
-    // Helper methods
     public function getFullLocation(): string
     {
-        return $this->city . ', ' . $this->country;
-    }
-
-    public function getFirstImageUrl(): ?string
-    {
-        return $this->imageUrls[0] ?? null;
-    }
-
-    public function getAverageRating(): float
-    {
-        if ($this->reviews->count() === 0) {
-            return 0.0;
-        }
-
-        $total = 0;
-        foreach ($this->reviews as $review) {
-            $total += $review->getRating();
-        }
-
-        return round($total / $this->reviews->count(), 1);
+        $parts = array_filter([$this->city, $this->country]);
+        return implode(', ', $parts) ?: 'Location not specified';
     }
 }

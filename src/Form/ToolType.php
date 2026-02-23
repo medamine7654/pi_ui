@@ -2,7 +2,10 @@
 
 namespace App\Form;
 
+use App\Entity\Category;
 use App\Entity\Tool;
+use App\Repository\CategoryRepository;
+use Symfony\Bridge\Doctrine\Form\Type\EntityType;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\Extension\Core\Type\IntegerType;
 use Symfony\Component\Form\Extension\Core\Type\NumberType;
@@ -13,6 +16,7 @@ use Symfony\Component\OptionsResolver\OptionsResolver;
 use Symfony\Component\Validator\Constraints\NotBlank;
 use Symfony\Component\Validator\Constraints\Positive;
 use Symfony\Component\Validator\Constraints\PositiveOrZero;
+use Vich\UploaderBundle\Form\Type\VichImageType;
 
 class ToolType extends AbstractType
 {
@@ -30,6 +34,22 @@ class ToolType extends AbstractType
                 'label' => 'Description',
                 'required' => false,
                 'attr' => ['class' => 'form-control', 'rows' => 4]
+            ])
+            ->add('category', EntityType::class, [
+                'class' => Category::class,
+                'choice_label' => 'name',
+                'placeholder' => 'Select a category',
+                'required' => true,
+                'query_builder' => function (CategoryRepository $repository) {
+                    return $repository->createQueryBuilder('c')
+                        ->where('c.type = :type')
+                        ->setParameter('type', 'tool')
+                        ->orderBy('c.name', 'ASC');
+                },
+                'attr' => ['class' => 'form-control'],
+                'constraints' => [
+                    new NotBlank(message: 'Please select a category'),
+                ],
             ])
             ->add('pricePerDay', NumberType::class, [
                 'label' => 'Price per Day (€)',
@@ -50,6 +70,16 @@ class ToolType extends AbstractType
             ->add('location', TextType::class, [
                 'label' => 'Location',
                 'required' => false,
+                'attr' => ['class' => 'form-control']
+            ])
+            ->add('imageFile', VichImageType::class, [
+                'required' => false,
+                'allow_delete' => true,
+                'delete_label' => 'Remove image',
+                'download_uri' => false,
+                'image_uri' => false,
+                'label' => 'Tool Image',
+                'help' => 'Max 5MB. Formats: JPG, PNG, GIF',
                 'attr' => ['class' => 'form-control']
             ])
         ;

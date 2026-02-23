@@ -2,20 +2,29 @@
 
 namespace App\DataFixtures;
 
+use App\Entity\Category;
 use App\Entity\Service;
 use App\Entity\Tool;
 use App\Entity\User;
 use Doctrine\Bundle\FixturesBundle\Fixture;
+use Doctrine\Common\DataFixtures\DependentFixtureInterface;
 use Doctrine\Persistence\ObjectManager;
 use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 
-class AppFixtures extends Fixture
+class AppFixtures extends Fixture implements DependentFixtureInterface
 {
     private UserPasswordHasherInterface $passwordHasher;
 
     public function __construct(UserPasswordHasherInterface $passwordHasher)
     {
         $this->passwordHasher = $passwordHasher;
+    }
+
+    public function getDependencies(): array
+    {
+        return [
+            CategoryFixtures::class,
+        ];
     }
 
     public function load(ObjectManager $manager): void
@@ -53,6 +62,7 @@ class AppFixtures extends Fixture
         $service1->setDurationMinutes(120);
         $service1->setLocation('Tunis');
         $service1->setIsActive(true);
+        $service1->setCategory($this->getReference(CategoryFixtures::PLUMBING_CATEGORY, Category::class));
         $manager->persist($service1);
 
         $service2 = new Service();
@@ -63,6 +73,7 @@ class AppFixtures extends Fixture
         $service2->setDurationMinutes(180);
         $service2->setLocation('Ariana');
         $service2->setIsActive(false);
+        $service2->setCategory($this->getReference(CategoryFixtures::GARDENING_CATEGORY, Category::class));
         $manager->persist($service2);
 
         // Create Sample Tools
@@ -74,6 +85,7 @@ class AppFixtures extends Fixture
         $tool1->setStockQuantity(3);
         $tool1->setLocation('Tunis');
         $tool1->setIsActive(true);
+        $tool1->setCategory($this->getReference(CategoryFixtures::POWER_TOOLS_CATEGORY, Category::class));
         $manager->persist($tool1);
 
         $tool2 = new Tool();
@@ -84,6 +96,7 @@ class AppFixtures extends Fixture
         $tool2->setStockQuantity(1);
         $tool2->setLocation('Ariana');
         $tool2->setIsActive(false);
+        $tool2->setCategory($this->getReference(CategoryFixtures::GARDEN_TOOLS_CATEGORY, Category::class));
         $manager->persist($tool2);
 
         $manager->flush();

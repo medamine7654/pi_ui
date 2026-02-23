@@ -6,6 +6,7 @@ use App\Repository\CategoryRepository;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Component\Validator\Constraints as Assert;
 
 #[ORM\Entity(repositoryClass: CategoryRepository::class)]
 class Category
@@ -16,23 +17,40 @@ class Category
     private ?int $id = null;
 
     #[ORM\Column(length: 100)]
+    #[Assert\NotBlank(message: 'Category name is required')]
+    #[Assert\Length(max: 100)]
     private ?string $name = null;
 
     #[ORM\Column(length: 255, nullable: true)]
     private ?string $description = null;
 
+    #[ORM\Column(length: 50)]
+    #[Assert\Choice(choices: ['service', 'tool', 'logement'], message: 'Type must be either service, tool, or logement')]
+    private ?string $type = null;
+
     #[ORM\Column(length: 50, nullable: true)]
     private ?string $icon = null;
+
+    #[ORM\Column]
+    private ?\DateTimeImmutable $createdAt = null;
+
+    #[ORM\OneToMany(targetEntity: Service::class, mappedBy: 'category')]
+    private Collection $services;
+
+    #[ORM\OneToMany(targetEntity: Tool::class, mappedBy: 'category')]
+    private Collection $tools;
 
     #[ORM\OneToMany(targetEntity: Logement::class, mappedBy: 'category')]
     private Collection $logements;
 
     public function __construct()
     {
+        $this->services = new ArrayCollection();
+        $this->tools = new ArrayCollection();
         $this->logements = new ArrayCollection();
+        $this->createdAt = new \DateTimeImmutable();
     }
 
-    // Getters and setters
     public function getId(): ?int
     {
         return $this->id;
@@ -60,6 +78,17 @@ class Category
         return $this;
     }
 
+    public function getType(): ?string
+    {
+        return $this->type;
+    }
+
+    public function setType(string $type): static
+    {
+        $this->type = $type;
+        return $this;
+    }
+
     public function getIcon(): ?string
     {
         return $this->icon;
@@ -71,32 +100,39 @@ class Category
         return $this;
     }
 
+    public function getCreatedAt(): ?\DateTimeImmutable
+    {
+        return $this->createdAt;
+    }
+
+    public function setCreatedAt(\DateTimeImmutable $createdAt): static
+    {
+        $this->createdAt = $createdAt;
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, Service>
+     */
+    public function getServices(): Collection
+    {
+        return $this->services;
+    }
+
+    /**
+     * @return Collection<int, Tool>
+     */
+    public function getTools(): Collection
+    {
+        return $this->tools;
+    }
+
     /**
      * @return Collection<int, Logement>
      */
     public function getLogements(): Collection
     {
         return $this->logements;
-    }
-
-    public function addLogement(Logement $logement): static
-    {
-        if (!$this->logements->contains($logement)) {
-            $this->logements->add($logement);
-            $logement->setCategory($this);
-        }
-        return $this;
-    }
-
-    public function removeLogement(Logement $logement): static
-    {
-        if ($this->logements->removeElement($logement)) {
-            // set the owning side to null (unless already changed)
-            if ($logement->getCategory() === $this) {
-                $logement->setCategory(null);
-            }
-        }
-        return $this;
     }
 
     public function __toString(): string
