@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { 
   Search, 
   MoreHorizontal, 
@@ -8,7 +8,9 @@ import {
   AlertTriangle,
   MapPin,
   Euro,
-  Package
+  Package,
+  Filter,
+  X
 } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -39,6 +41,8 @@ import {
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Progress } from '@/components/ui/progress';
+import { Slider } from '@/components/ui/slider';
+import { Label } from '@/components/ui/label';
 import { mockTools, mockBookings } from '@/data/mockData';
 import type { Tool, ToolStatus } from '@/types';
 import { StatusBadge } from '@/components/StatusBadge';
@@ -53,6 +57,20 @@ export function ToolsModeration() {
   const [showActionDialog, setShowActionDialog] = useState(false);
   const [actionType, setActionType] = useState<'approve' | 'hide' | 'suspend'>('approve');
   const [toolToAction, setToolToAction] = useState<Tool | null>(null);
+  const [showFilters, setShowFilters] = useState(false);
+  const [filters, setFilters] = useState({
+    minPrice: 0,
+    maxPrice: 500,
+    location: '',
+    minStock: 0,
+  });
+
+  // Reset dialog state on unmount
+  useEffect(() => {
+    return () => {
+      setShowFilters(false);
+    };
+  }, []);
 
   const filteredTools = tools.filter(tool => {
     const matchesSearch = 
@@ -60,8 +78,26 @@ export function ToolsModeration() {
       tool.hostName.toLowerCase().includes(searchQuery.toLowerCase()) ||
       tool.location.toLowerCase().includes(searchQuery.toLowerCase());
     const matchesStatus = statusFilter === 'all' || tool.status === statusFilter;
-    return matchesSearch && matchesStatus;
+    const matchesPrice = tool.pricePerDay >= filters.minPrice && tool.pricePerDay <= filters.maxPrice;
+    const matchesLocation = !filters.location || tool.location.toLowerCase().includes(filters.location.toLowerCase());
+    const matchesStock = tool.stock >= filters.minStock;
+    return matchesSearch && matchesStatus && matchesPrice && matchesLocation && matchesStock;
   });
+
+  const activeFiltersCount = 
+    (filters.minPrice > 0 ? 1 : 0) +
+    (filters.maxPrice < 500 ? 1 : 0) +
+    (filters.location ? 1 : 0) +
+    (filters.minStock > 0 ? 1 : 0);
+
+  const clearFilters = () => {
+    setFilters({
+      minPrice: 0,
+      maxPrice: 500,
+      location: '',
+      minStock: 0,
+    });
+  };
 
   const reportedTools = tools.filter(t => t.reportsCount > 0);
   const maintenanceTools = tools.filter(t => t.status === 'maintenance');
@@ -148,6 +184,12 @@ export function ToolsModeration() {
             setStatusFilter={setStatusFilter}
             onViewDetails={handleViewDetails}
             onAction={handleAction}
+            showFilters={showFilters}
+            setShowFilters={setShowFilters}
+            filters={filters}
+            setFilters={setFilters}
+            activeFiltersCount={activeFiltersCount}
+            clearFilters={clearFilters}
           />
         </TabsContent>
 
@@ -160,6 +202,12 @@ export function ToolsModeration() {
             setStatusFilter={setStatusFilter}
             onViewDetails={handleViewDetails}
             onAction={handleAction}
+            showFilters={showFilters}
+            setShowFilters={setShowFilters}
+            filters={filters}
+            setFilters={setFilters}
+            activeFiltersCount={activeFiltersCount}
+            clearFilters={clearFilters}
             hideFilter
           />
         </TabsContent>
@@ -173,6 +221,12 @@ export function ToolsModeration() {
             setStatusFilter={setStatusFilter}
             onViewDetails={handleViewDetails}
             onAction={handleAction}
+            showFilters={showFilters}
+            setShowFilters={setShowFilters}
+            filters={filters}
+            setFilters={setFilters}
+            activeFiltersCount={activeFiltersCount}
+            clearFilters={clearFilters}
             hideFilter
           />
         </TabsContent>
@@ -403,6 +457,17 @@ interface ToolsTableProps {
   onViewDetails: (tool: Tool) => void;
   onAction: (tool: Tool, action: 'approve' | 'hide' | 'suspend') => void;
   hideFilter?: boolean;
+  showFilters: boolean;
+  setShowFilters: (show: boolean) => void;
+  filters: {
+    minPrice: number;
+    maxPrice: number;
+    location: string;
+    minStock: number;
+  };
+  setFilters: (filters: any) => void;
+  activeFiltersCount: number;
+  clearFilters: () => void;
 }
 
 function ToolsTable({ 
@@ -413,7 +478,13 @@ function ToolsTable({
   setStatusFilter,
   onViewDetails,
   onAction,
-  hideFilter = false
+  hideFilter = false,
+  showFilters,
+  setShowFilters,
+  filters,
+  setFilters,
+  activeFiltersCount,
+  clearFilters
 }: ToolsTableProps) {
   return (
     <div className="space-y-4">
@@ -443,10 +514,98 @@ function ToolsTable({
                   <SelectItem value="suspended">Suspendu</SelectItem>
                 </SelectContent>
               </Select>
+              <Button 
+                variant="outline" 
+                className="relative"
+                onClick={() => setShowFilters(true)}
+              >
+                <Filter className="h-4 w-4 mr-2" />
+                Filters
+                {activeFiltersCount > 0 && (
+                  <span className="absolute -top-2 -right-2 h-5 w-5 bg-[#FF5A5F] text-white text-xs rounded-full flex items-center justify-center">
+                    {activeFiltersCount}
+                  </span>
+                )}
+              </Button>
             </div>
           </CardContent>
         </Card>
       )}
+
+      {/* Filters Panel */}
+      <Dialog key={`filters-${showFilters}`} open={showFilters} onOpenChange={setShowFilters}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle>Filtres avancés</DialogTitle>
+            <DialogDescription>
+              Affinez votre recherche avec ces options
+            </DialogDescription>
+          </DialogHeader>
+          
+          <div className="space-y-6 py-4">
+            {/* Price Range */}
+            <div className="space-y-3">
+              <Label>Prix par jour</Label>
+              <div className="space-y-2">
+                <Slider
+                  min={0}
+                  max={500}
+                  step={10}
+                  value={[filters.minPrice, filters.maxPrice]}
+                  onValueChange={([min, max]) => setFilters({ ...filters, minPrice: min, maxPrice: max })}
+                  className="w-full"
+                />
+                <div className="flex items-center justify-between text-sm text-gray-600">
+                  <span>{filters.minPrice}€</span>
+                  <span>{filters.maxPrice}€</span>
+                </div>
+              </div>
+            </div>
+
+            {/* Location */}
+            <div className="space-y-2">
+              <Label htmlFor="location">Localisation</Label>
+              <div className="relative">
+                <MapPin className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
+                <Input
+                  id="location"
+                  placeholder="Ville ou région..."
+                  className="pl-10"
+                  value={filters.location}
+                  onChange={(e) => setFilters({ ...filters, location: e.target.value })}
+                />
+              </div>
+            </div>
+
+            {/* Minimum Stock */}
+            <div className="space-y-3">
+              <Label>Stock minimum</Label>
+              <div className="space-y-2">
+                <Slider
+                  min={0}
+                  max={10}
+                  step={1}
+                  value={[filters.minStock]}
+                  onValueChange={([value]) => setFilters({ ...filters, minStock: value })}
+                  className="w-full"
+                />
+                <div className="text-sm text-gray-600">
+                  {filters.minStock} unité{filters.minStock > 1 ? 's' : ''} minimum
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <DialogFooter className="gap-2">
+            <Button variant="outline" onClick={clearFilters}>
+              Réinitialiser
+            </Button>
+            <Button onClick={() => setShowFilters(false)}>
+              Appliquer
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
 
       <Card>
         <CardContent className="p-0">

@@ -1,45 +1,121 @@
 {% extends 'base.html.twig' %}
 
-{% block title %}Login{% endblock %}
+{% block title %}Login - RentAdmin{% endblock %}
 
 {% block body %}
-<div class="row justify-content-center">
-    <div class="col-md-6">
-        <div class="card">
-            <div class="card-header">
-                <h4>Login</h4>
+<div class="min-h-screen flex items-center justify-center bg-[#F7F7F7] py-12 px-4 sm:px-6 lg:px-8">
+    <div class="w-full max-w-md">
+        <!-- Logo and Header -->
+        <div class="text-center mb-8 animate-fade-in">
+            <div class="inline-flex items-center justify-center w-16 h-16 bg-gradient-to-br from-[#FF5A5F] to-[#00A699] rounded-2xl mb-4 shadow-lg">
+                <i class="fas fa-shield-alt text-white text-2xl"></i>
             </div>
-            <div class="card-body">
-                {% if error %}
-                    <div class="alert alert-danger">{{ error.messageKey|trans(error.messageData, 'security') }}</div>
-                {% endif %}
+            <h1 class="text-3xl font-bold text-[#484848] mb-2">Welcome Back</h1>
+            <p class="text-gray-600">Sign in to your admin account</p>
+        </div>
 
-                <form method="post">
-                    <div class="mb-3">
-                        <label for="inputEmail" class="form-label">Email</label>
-                        <input type="email" value="{{ last_username }}" name="_username" id="inputEmail" class="form-control" required autofocus>
+        <!-- Login Card -->
+        <div class="bg-white rounded-2xl shadow-xl p-8 animate-fade-in">
+            {% if error %}
+                <div class="mb-6 p-4 bg-red-50 border border-red-200 text-red-700 rounded-xl flex items-start gap-3">
+                    <i class="fas fa-exclamation-circle text-xl mt-0.5"></i>
+                    <span class="text-sm">{{ error.messageKey|trans(error.messageData, 'security') }}</span>
+                </div>
+            {% endif %}
+
+            <form method="post" class="space-y-6">
+                <!-- Email Field -->
+                <div>
+                    <label for="inputEmail" class="block text-sm font-medium text-[#484848] mb-2">
+                        Email Address
+                    </label>
+                    <div class="relative">
+                        <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                            <i class="fas fa-envelope text-gray-400"></i>
+                        </div>
+                        <input 
+                            type="email" 
+                            value="{{ last_username }}" 
+                            name="_username" 
+                            id="inputEmail" 
+                            class="w-full pl-10 pr-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-[#FF5A5F] focus:border-transparent transition-all bg-gray-50 focus:bg-white" 
+                            placeholder="admin@example.com"
+                            required 
+                            autofocus
+                        >
                     </div>
+                </div>
 
-                    <div class="mb-3">
-                        <label for="inputPassword" class="form-label">Password</label>
-                        <input type="password" name="_password" id="inputPassword" class="form-control" required>
+                <!-- Password Field -->
+                <div>
+                    <label for="inputPassword" class="block text-sm font-medium text-[#484848] mb-2">
+                        Password
+                    </label>
+                    <div class="relative">
+                        <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                            <i class="fas fa-lock text-gray-400"></i>
+                        </div>
+                        <input 
+                            type="password" 
+                            name="_password" 
+                            id="inputPassword" 
+                            class="w-full pl-10 pr-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-[#FF5A5F] focus:border-transparent transition-all bg-gray-50 focus:bg-white" 
+                            placeholder="••••••••"
+                            required
+                        >
                     </div>
+                </div>
 
-                    <input type="hidden" name="_csrf_token" value="{{ csrf_token('authenticate') }}">
+                <!-- Remember Me & Forgot Password -->
+                <div class="flex items-center justify-between">
+                    <label class="flex items-center cursor-pointer">
+                        <input type="checkbox" name="_remember_me" class="w-4 h-4 text-[#FF5A5F] border-gray-300 rounded focus:ring-[#FF5A5F]">
+                        <span class="ml-2 text-sm text-gray-600">Remember me</span>
+                    </label>
+                    <a href="#" class="text-sm font-medium text-[#FF5A5F] hover:text-[#00A699] transition-colors">
+                        Forgot password?
+                    </a>
+                </div>
 
-                    <button class="btn btn-primary w-100" type="submit">Sign in</button>
-                </form>
+                <input type="hidden" name="_csrf_token" value="{{ csrf_token('authenticate') }}">
 
-                <div class="mt-3">
-                    <p class="text-muted">Test accounts:</p>
-                    <ul class="small">
-                        <li>Admin: admin@test.com / admin123</li>
-                        <li>Host: host@test.com / host123</li>
-                        <li>Guest: guest@test.com / guest123</li>
-                    </ul>
+                <!-- Submit Button -->
+                <button 
+                    type="submit"
+                    class="w-full bg-gradient-to-r from-[#FF5A5F] to-[#00A699] text-white py-3 rounded-xl font-semibold hover:shadow-lg hover:scale-[1.02] transition-all duration-200 flex items-center justify-center gap-2"
+                >
+                    <span>Sign In</span>
+                    <i class="fas fa-arrow-right"></i>
+                </button>
+            </form>
+
+            <!-- Test Accounts -->
+            <div class="mt-6 pt-6 border-t border-gray-200">
+                <p class="text-xs font-medium text-gray-500 mb-3 flex items-center gap-2">
+                    <i class="fas fa-info-circle"></i>
+                    Test Accounts
+                </p>
+                <div class="space-y-2 text-xs text-gray-600">
+                    <div class="flex items-center gap-2 p-2 bg-gray-50 rounded-lg">
+                        <i class="fas fa-user-shield text-[#FF5A5F]"></i>
+                        <span><strong>Admin:</strong> admin@test.com / admin123</span>
+                    </div>
+                    <div class="flex items-center gap-2 p-2 bg-gray-50 rounded-lg">
+                        <i class="fas fa-user text-[#00A699]"></i>
+                        <span><strong>Host:</strong> host@test.com / host123</span>
+                    </div>
+                    <div class="flex items-center gap-2 p-2 bg-gray-50 rounded-lg">
+                        <i class="fas fa-user text-gray-500"></i>
+                        <span><strong>Guest:</strong> guest@test.com / guest123</span>
+                    </div>
                 </div>
             </div>
         </div>
+
+        <!-- Footer Text -->
+        <p class="mt-6 text-center text-sm text-gray-600">
+            Need help? Contact your administrator
+        </p>
     </div>
 </div>
 {% endblock %}

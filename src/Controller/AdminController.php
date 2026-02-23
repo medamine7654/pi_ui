@@ -2,6 +2,11 @@
 
 namespace App\Controller;
 
+use App\Entity\Service;
+use App\Entity\Tool;
+use App\Repository\ServiceRepository;
+use App\Repository\ToolRepository;
+use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -82,19 +87,42 @@ class AdminController extends AbstractController
      * Services moderation
      */
     #[Route('/services', name: 'admin_services')]
-    public function services(Request $request): Response
+    public function services(Request $request, ServiceRepository $serviceRepository): Response
     {
         $tab = $request->query->get('tab', 'all');
         $search = $request->query->get('search');
         $status = $request->query->get('status');
 
-        // Fetch services from your repository
-        // $services = $this->serviceRepository->findByFilters($tab, $search, $status);
+        // Fetch all services from database
+        $services = $serviceRepository->findAll();
+        
+        // Transform services to match template expectations
+        $servicesData = array_map(function($service) {
+            $category = $service->getCategory();
+            return [
+                'id' => $service->getId(),
+                'title' => $service->getName(),
+                'description' => $service->getDescription(),
+                'hostName' => $service->getHost() ? $service->getHost()->getName() : 'Unknown',
+                'price' => $service->getBasePrice(),
+                'location' => $service->getLocation() ?? 'Non spécifié',
+                'status' => $service->getIsActive() ? 'approved' : 'pending',
+                'rating' => 0, // TODO: Add rating system
+                'reportsCount' => 0, // TODO: Add reports count
+                'bookingsCount' => 0, // TODO: Add bookings count
+                'images' => $service->getImageName() ? ['/uploads/service_images/' . $service->getImageName()] : [],
+                'image' => $service->getImageName() ? '/uploads/service_images/' . $service->getImageName() : null,
+                'category' => $category ? [
+                    'name' => $category->getName(),
+                    'icon' => $category->getIcon() ?? 'fas fa-briefcase'
+                ] : null,
+            ];
+        }, $services);
 
         return $this->render('admin/services.html.twig', [
-            // 'services' => $services,
-            'pending_count' => 1,
-            'reported_count' => 1,
+            'services' => $servicesData,
+            'pending_count' => count(array_filter($servicesData, fn($s) => $s['status'] === 'pending')),
+            'reported_count' => 0, // TODO: Calculate from reports
         ]);
     }
 
@@ -102,10 +130,12 @@ class AdminController extends AbstractController
      * Approve a service
      */
     #[Route('/services/{id}/approve', name: 'admin_service_approve', methods: ['POST'])]
-    public function approveService(string $id, Request $request): Response
+    public function approveService(Service $service, Request $request, EntityManagerInterface $em): Response
     {
-        if ($this->isCsrfTokenValid('approve' . $id, $request->request->get('_token'))) {
-            // Approve service logic here
+        if ($this->isCsrfTokenValid('approve' . $service->getId(), $request->request->get('_token'))) {
+            $service->setIsActive(true);
+            $em->flush();
+            
             $this->addFlash('success', 'Le service a été approuvé.');
         }
 
@@ -116,25 +146,13 @@ class AdminController extends AbstractController
      * Hide a service
      */
     #[Route('/services/{id}/hide', name: 'admin_service_hide', methods: ['POST'])]
-    public function hideService(string $id, Request $request): Response
+    public function hideService(Service $service, Request $request, EntityManagerInterface $em): Response
     {
-        if ($this->isCsrfTokenValid('hide' . $id, $request->request->get('_token'))) {
-            // Hide service logic here
+        if ($this->isCsrfTokenValid('hide' . $service->getId(), $request->request->get('_token'))) {
+            $service->setIsActive(false);
+            $em->flush();
+            
             $this->addFlash('success', 'Le service a été masqué.');
-        }
-
-        return $this->redirectToRoute('admin_services');
-    }
-
-    /**
-     * Suspend a service
-     */
-    #[Route('/services/{id}/suspend', name: 'admin_service_suspend', methods: ['POST'])]
-    public function suspendService(string $id, Request $request): Response
-    {
-        if ($this->isCsrfTokenValid('suspend' . $id, $request->request->get('_token'))) {
-            // Suspend service logic here
-            $this->addFlash('success', 'Le service a été suspendu.');
         }
 
         return $this->redirectToRoute('admin_services');
@@ -144,15 +162,42 @@ class AdminController extends AbstractController
      * Tools moderation
      */
     #[Route('/tools', name: 'admin_tools')]
-    public function tools(Request $request): Response
+    public function tools(Request $request, ToolRepository $toolRepository): Response
     {
         $tab = $request->query->get('tab', 'all');
         $search = $request->query->get('search');
         $status = $request->query->get('status');
 
+        // Fetch all tools from database
+        $tools = $toolRepository->findAll();
+        
+        // Transform tools to match template expectations
+        $toolsData = array_map(function($tool) {
+            $category = $tool->getCategory();
+            return [
+                'id' => $tool->getId(),
+                'name' => $tool->getName(),
+                'description' => $tool->getDescription(),
+                'hostName' => $tool->getHost() ? $tool->getHost()->getName() : 'Unknown',
+                'pricePerDay' => $tool->getPricePerDay(),
+                'stock' => $tool->getStockQuantity(),
+                'location' => $tool->getLocation() ?? 'Non spécifié',
+                'status' => $tool->getIsActive() ? 'available' : 'hidden',
+                'reportsCount' => 0, // TODO: Add reports count
+                'rentalsCount' => 0, // TODO: Add rentals count
+                'images' => $tool->getImageName() ? ['/uploads/tool_images/' . $tool->getImageName()] : [],
+                'image' => $tool->getImageName() ? '/uploads/tool_images/' . $tool->getImageName() : null,
+                'category' => $category ? [
+                    'name' => $category->getName(),
+                    'icon' => $category->getIcon() ?? 'fas fa-wrench'
+                ] : null,
+            ];
+        }, $tools);
+
         return $this->render('admin/tools.html.twig', [
-            'maintenance_count' => 1,
-            'reported_count' => 1,
+            'tools' => $toolsData,
+            'maintenance_count' => 0, // TODO: Calculate from status
+            'reported_count' => 0, // TODO: Calculate from reports
         ]);
     }
 
@@ -160,10 +205,13 @@ class AdminController extends AbstractController
      * Activate a tool
      */
     #[Route('/tools/{id}/activate', name: 'admin_tool_activate', methods: ['POST'])]
-    public function activateTool(string $id, Request $request): Response
+    public function activateTool(Tool $tool, Request $request, EntityManagerInterface $em): Response
     {
-        if ($this->isCsrfTokenValid('activate' . $id, $request->request->get('_token'))) {
-            $this->addFlash('success', 'Le matériel a été réactivé.');
+        if ($this->isCsrfTokenValid('activate' . $tool->getId(), $request->request->get('_token'))) {
+            $tool->setIsActive(true);
+            $em->flush();
+            
+            $this->addFlash('success', 'Le matériel a été activé.');
         }
 
         return $this->redirectToRoute('admin_tools');
@@ -173,23 +221,13 @@ class AdminController extends AbstractController
      * Hide a tool
      */
     #[Route('/tools/{id}/hide', name: 'admin_tool_hide', methods: ['POST'])]
-    public function hideTool(string $id, Request $request): Response
+    public function hideTool(Tool $tool, Request $request, EntityManagerInterface $em): Response
     {
-        if ($this->isCsrfTokenValid('hide' . $id, $request->request->get('_token'))) {
+        if ($this->isCsrfTokenValid('hide' . $tool->getId(), $request->request->get('_token'))) {
+            $tool->setIsActive(false);
+            $em->flush();
+            
             $this->addFlash('success', 'Le matériel a été masqué.');
-        }
-
-        return $this->redirectToRoute('admin_tools');
-    }
-
-    /**
-     * Suspend a tool
-     */
-    #[Route('/tools/{id}/suspend', name: 'admin_tool_suspend', methods: ['POST'])]
-    public function suspendTool(string $id, Request $request): Response
-    {
-        if ($this->isCsrfTokenValid('suspend' . $id, $request->request->get('_token'))) {
-            $this->addFlash('success', 'Le matériel a été suspendu.');
         }
 
         return $this->redirectToRoute('admin_tools');

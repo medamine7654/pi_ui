@@ -17,23 +17,23 @@ function App() {
   const renderContent = () => {
     switch (activeSection) {
       case 'dashboard':
-        return <DashboardOverview />;
+        return <DashboardOverview key="dashboard" />;
       case 'users':
-        return <UsersManagement />;
+        return <UsersManagement key="users" />;
       case 'services':
-        return <ServicesModeration />;
+        return <ServicesModeration key="services" />;
       case 'tools':
-        return <ToolsModeration />;
+        return <ToolsModeration key="tools" />;
       case 'bookings':
-        return <BookingsOversight />;
+        return <BookingsOversight key="bookings" />;
       case 'reports':
-        return <ReportsFraud />;
+        return <ReportsFraud key="reports" />;
       case 'analytics':
-        return <Analytics />;
+        return <Analytics key="analytics" />;
       case 'settings':
-        return <Settings />;
+        return <Settings key="settings" />;
       default:
-        return <DashboardOverview />;
+        return <DashboardOverview key="dashboard" />;
     }
   };
 

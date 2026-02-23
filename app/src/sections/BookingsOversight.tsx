@@ -1,10 +1,11 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { 
   Search, 
   Eye, 
   Briefcase,
   Wrench,
-  AlertTriangle
+  AlertTriangle,
+  Filter
 } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -25,6 +26,8 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Slider } from '@/components/ui/slider';
+import { Label } from '@/components/ui/label';
 import { mockBookings } from '@/data/mockData';
 import type { Booking, BookingStatus } from '@/types';
 import { StatusBadge } from '@/components/StatusBadge';
@@ -37,6 +40,20 @@ export function BookingsOversight() {
   const [typeFilter, setTypeFilter] = useState<'all' | 'service' | 'tool'>('all');
   const [selectedBooking, setSelectedBooking] = useState<Booking | null>(null);
   const [showBookingDetails, setShowBookingDetails] = useState(false);
+  const [showFilters, setShowFilters] = useState(false);
+  const [filters, setFilters] = useState({
+    minAmount: 0,
+    maxAmount: 1000,
+    startDate: '',
+    endDate: '',
+  });
+
+  // Reset dialog state on unmount
+  useEffect(() => {
+    return () => {
+      setShowFilters(false);
+    };
+  }, []);
 
   const filteredBookings = bookings.filter(booking => {
     const matchesSearch = 
@@ -45,8 +62,26 @@ export function BookingsOversight() {
       booking.hostName.toLowerCase().includes(searchQuery.toLowerCase());
     const matchesStatus = statusFilter === 'all' || booking.status === statusFilter;
     const matchesType = typeFilter === 'all' || booking.type === typeFilter;
-    return matchesSearch && matchesStatus && matchesType;
+    const matchesAmount = booking.totalAmount >= filters.minAmount && booking.totalAmount <= filters.maxAmount;
+    const matchesStartDate = !filters.startDate || new Date(booking.startDate) >= new Date(filters.startDate);
+    const matchesEndDate = !filters.endDate || new Date(booking.endDate) <= new Date(filters.endDate);
+    return matchesSearch && matchesStatus && matchesType && matchesAmount && matchesStartDate && matchesEndDate;
   });
+
+  const activeFiltersCount = 
+    (filters.minAmount > 0 ? 1 : 0) +
+    (filters.maxAmount < 1000 ? 1 : 0) +
+    (filters.startDate ? 1 : 0) +
+    (filters.endDate ? 1 : 0);
+
+  const clearFilters = () => {
+    setFilters({
+      minAmount: 0,
+      maxAmount: 1000,
+      startDate: '',
+      endDate: '',
+    });
+  };
 
   const cancelledBookings = bookings.filter(b => b.status === 'cancelled');
   const serviceBookings = bookings.filter(b => b.type === 'service');
@@ -131,6 +166,12 @@ export function BookingsOversight() {
             onViewDetails={handleViewDetails}
             getCancellationRate={getCancellationRate}
             getHostCancellationRate={getHostCancellationRate}
+            showFilters={showFilters}
+            setShowFilters={setShowFilters}
+            filters={filters}
+            setFilters={setFilters}
+            activeFiltersCount={activeFiltersCount}
+            clearFilters={clearFilters}
           />
         </TabsContent>
 
@@ -146,6 +187,12 @@ export function BookingsOversight() {
             onViewDetails={handleViewDetails}
             getCancellationRate={getCancellationRate}
             getHostCancellationRate={getHostCancellationRate}
+            showFilters={showFilters}
+            setShowFilters={setShowFilters}
+            filters={filters}
+            setFilters={setFilters}
+            activeFiltersCount={activeFiltersCount}
+            clearFilters={clearFilters}
             hideTypeFilter
           />
         </TabsContent>
@@ -162,6 +209,12 @@ export function BookingsOversight() {
             onViewDetails={handleViewDetails}
             getCancellationRate={getCancellationRate}
             getHostCancellationRate={getHostCancellationRate}
+            showFilters={showFilters}
+            setShowFilters={setShowFilters}
+            filters={filters}
+            setFilters={setFilters}
+            activeFiltersCount={activeFiltersCount}
+            clearFilters={clearFilters}
             hideTypeFilter
           />
         </TabsContent>
@@ -178,6 +231,12 @@ export function BookingsOversight() {
             onViewDetails={handleViewDetails}
             getCancellationRate={getCancellationRate}
             getHostCancellationRate={getHostCancellationRate}
+            showFilters={showFilters}
+            setShowFilters={setShowFilters}
+            filters={filters}
+            setFilters={setFilters}
+            activeFiltersCount={activeFiltersCount}
+            clearFilters={clearFilters}
             hideStatusFilter
           />
         </TabsContent>
@@ -329,6 +388,17 @@ interface BookingsTableProps {
   getHostCancellationRate: (hostId: string) => number;
   hideTypeFilter?: boolean;
   hideStatusFilter?: boolean;
+  showFilters: boolean;
+  setShowFilters: (show: boolean) => void;
+  filters: {
+    minAmount: number;
+    maxAmount: number;
+    startDate: string;
+    endDate: string;
+  };
+  setFilters: (filters: any) => void;
+  activeFiltersCount: number;
+  clearFilters: () => void;
 }
 
 function BookingsTable({ 
@@ -343,7 +413,13 @@ function BookingsTable({
   getCancellationRate,
   getHostCancellationRate,
   hideTypeFilter = false,
-  hideStatusFilter = false
+  hideStatusFilter = false,
+  showFilters,
+  setShowFilters,
+  filters,
+  setFilters,
+  activeFiltersCount,
+  clearFilters
 }: BookingsTableProps) {
   return (
     <div className="space-y-4">
@@ -386,10 +462,87 @@ function BookingsTable({
                   </SelectContent>
                 </Select>
               )}
+              <Button 
+                variant="outline" 
+                className="relative"
+                onClick={() => setShowFilters(true)}
+              >
+                <Filter className="h-4 w-4 mr-2" />
+                Filters
+                {activeFiltersCount > 0 && (
+                  <span className="absolute -top-2 -right-2 h-5 w-5 bg-[#FF5A5F] text-white text-xs rounded-full flex items-center justify-center">
+                    {activeFiltersCount}
+                  </span>
+                )}
+              </Button>
             </div>
           </div>
         </CardContent>
       </Card>
+
+      {/* Filters Panel */}
+      <Dialog key={`filters-${showFilters}`} open={showFilters} onOpenChange={setShowFilters}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle>Filtres avancés</DialogTitle>
+            <DialogDescription>
+              Affinez votre recherche avec ces options
+            </DialogDescription>
+          </DialogHeader>
+          
+          <div className="space-y-6 py-4">
+            {/* Amount Range */}
+            <div className="space-y-3">
+              <Label>Montant</Label>
+              <div className="space-y-2">
+                <Slider
+                  min={0}
+                  max={1000}
+                  step={50}
+                  value={[filters.minAmount, filters.maxAmount]}
+                  onValueChange={([min, max]) => setFilters({ ...filters, minAmount: min, maxAmount: max })}
+                  className="w-full"
+                />
+                <div className="flex items-center justify-between text-sm text-gray-600">
+                  <span>{filters.minAmount}€</span>
+                  <span>{filters.maxAmount}€</span>
+                </div>
+              </div>
+            </div>
+
+            {/* Start Date */}
+            <div className="space-y-2">
+              <Label htmlFor="startDate">Date de début (après)</Label>
+              <Input
+                id="startDate"
+                type="date"
+                value={filters.startDate}
+                onChange={(e) => setFilters({ ...filters, startDate: e.target.value })}
+              />
+            </div>
+
+            {/* End Date */}
+            <div className="space-y-2">
+              <Label htmlFor="endDate">Date de fin (avant)</Label>
+              <Input
+                id="endDate"
+                type="date"
+                value={filters.endDate}
+                onChange={(e) => setFilters({ ...filters, endDate: e.target.value })}
+              />
+            </div>
+          </div>
+
+          <DialogFooter className="gap-2">
+            <Button variant="outline" onClick={clearFilters}>
+              Réinitialiser
+            </Button>
+            <Button onClick={() => setShowFilters(false)}>
+              Appliquer
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
 
       <Card>
         <CardContent className="p-0">
