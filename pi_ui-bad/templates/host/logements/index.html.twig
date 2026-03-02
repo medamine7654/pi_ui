@@ -1,0 +1,128 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}My Properties - Host Dashboard{% endblock %}
+
+{% block body %}
+<div class="container mx-auto px-4 py-6">
+    {# Page Header #}
+    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
+        <div>
+            <h1 class="text-3xl font-bold text-gray-900">My Properties</h1>
+            <p class="text-gray-600 mt-1">Manage your accommodation listings</p>
+        </div>
+        <a href="{{ path('host_logement_new') }}" class="inline-flex items-center px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 font-medium transition-colors">
+            <svg class="h-5 w-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
+            </svg>
+            Add New Property
+        </a>
+    </div>
+
+    {# Logements Table #}
+    <div class="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
+        {% if logements|length > 0 %}
+            <div class="overflow-x-auto">
+                <table class="w-full">
+                    <thead class="bg-gray-50 border-b border-gray-200">
+                        <tr>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Property</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Category</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Price/Night</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Location</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Details</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
+                            <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-gray-200">
+                        {% for logement in logements %}
+                            <tr class="hover:bg-gray-50 transition-colors">
+                                <td class="px-6 py-4">
+                                    <div class="font-medium text-gray-900">{{ logement.name }}</div>
+                                    {% if logement.description %}
+                                        <div class="text-sm text-gray-500">{{ logement.description|length > 50 ? logement.description|slice(0, 50) ~ '...' : logement.description }}</div>
+                                    {% endif %}
+                                </td>
+                                <td class="px-6 py-4">
+                                    {% if logement.category %}
+                                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-purple-100 text-purple-800">
+                                            <i class="{{ logement.category.icon }} mr-1"></i>
+                                            {{ logement.category.name }}
+                                        </span>
+                                    {% else %}
+                                        <span class="text-sm text-gray-400">No category</span>
+                                    {% endif %}
+                                </td>
+                                <td class="px-6 py-4 text-sm text-gray-900">€{{ logement.pricePerNight }}</td>
+                                <td class="px-6 py-4 text-sm text-gray-900">{{ logement.fullLocation }}</td>
+                                <td class="px-6 py-4 text-sm text-gray-600">
+                                    {% if logement.numberOfRooms or logement.numberOfBeds or logement.maxGuests %}
+                                        <div class="space-y-1">
+                                            {% if logement.numberOfRooms %}<div><i class="fa-solid fa-door-open mr-1"></i>{{ logement.numberOfRooms }} rooms</div>{% endif %}
+                                            {% if logement.numberOfBeds %}<div><i class="fa-solid fa-bed mr-1"></i>{{ logement.numberOfBeds }} beds</div>{% endif %}
+                                            {% if logement.maxGuests %}<div><i class="fa-solid fa-users mr-1"></i>{{ logement.maxGuests }} guests</div>{% endif %}
+                                        </div>
+                                    {% else %}
+                                        <span class="text-gray-400">-</span>
+                                    {% endif %}
+                                </td>
+                                <td class="px-6 py-4">
+                                    {% if logement.isActive %}
+                                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                                            <svg class="mr-1 h-2 w-2 fill-current" viewBox="0 0 8 8">
+                                                <circle cx="4" cy="4" r="3"/>
+                                            </svg>
+                                            Active
+                                        </span>
+                                    {% else %}
+                                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800">
+                                            <svg class="mr-1 h-2 w-2 fill-current" viewBox="0 0 8 8">
+                                                <circle cx="4" cy="4" r="3"/>
+                                            </svg>
+                                            Pending
+                                        </span>
+                                    {% endif %}
+                                </td>
+                                <td class="px-6 py-4 text-right text-sm font-medium">
+                                    <div class="flex items-center justify-end gap-2">
+                                        <a href="{{ path('host_logement_edit', {id: logement.id}) }}" class="text-purple-600 hover:text-purple-900">
+                                            <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>
+                                            </svg>
+                                        </a>
+                                        <form method="post" action="{{ path('host_logement_delete', {id: logement.id}) }}" onsubmit="return confirm('Are you sure you want to delete this property?');" class="inline">
+                                            <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ logement.id) }}">
+                                            <button type="submit" class="text-red-600 hover:text-red-900">
+                                                <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
+                                                </svg>
+                                            </button>
+                                        </form>
+                                    </div>
+                                </td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        {% else %}
+            {# Empty State #}
+            <div class="text-center py-12">
+                <svg class="mx-auto h-12 w-12 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/>
+                </svg>
+                <h3 class="mt-2 text-sm font-medium text-gray-900">No properties</h3>
+                <p class="mt-1 text-sm text-gray-500">Get started by listing your first property.</p>
+                <div class="mt-6">
+                    <a href="{{ path('host_logement_new') }}" class="inline-flex items-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-purple-600 hover:bg-purple-700">
+                        <svg class="h-5 w-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
+                        </svg>
+                        New Property
+                    </a>
+                </div>
+            </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

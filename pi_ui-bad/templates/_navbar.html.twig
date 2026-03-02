@@ -1,0 +1,123 @@
+{# Modern Navigation Bar #}
+<header class="sticky top-0 z-50 w-full glass-effect border-b border-gray-200 shadow-sm">
+    <div class="container mx-auto flex h-20 items-center justify-between px-4">
+        {# Logo #}
+        <a href="{{ path('app_home') }}" class="flex items-center gap-3 group">
+            <div class="relative">
+                <div class="absolute inset-0 bg-gradient-to-br from-purple-500 to-pink-500 rounded-2xl blur-sm group-hover:blur-md transition-all"></div>
+                <div class="relative flex h-12 w-12 items-center justify-center rounded-2xl bg-gradient-to-br from-purple-600 to-pink-600 shadow-lg">
+                    <i class="fas fa-home text-white text-xl"></i>
+                </div>
+            </div>
+            <span class="text-2xl font-bold bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent">RentAll</span>
+        </a>
+
+        {# Desktop Navigation #}
+        <nav class="hidden lg:flex items-center gap-2">
+            <a href="{{ path('app_logements') }}" class="flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-medium text-gray-700 hover:bg-gradient-to-r hover:from-purple-50 hover:to-pink-50 hover:text-purple-700 transition-all">
+                <i class="fas fa-home"></i>
+                <span>Stays</span>
+            </a>
+            <a href="{{ path('app_tools') }}" class="flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-medium text-gray-700 hover:bg-gradient-to-r hover:from-purple-50 hover:to-pink-50 hover:text-purple-700 transition-all">
+                <i class="fas fa-tools"></i>
+                <span>Tools</span>
+            </a>
+            <a href="{{ path('app_services') }}" class="flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-medium text-gray-700 hover:bg-gradient-to-r hover:from-purple-50 hover:to-pink-50 hover:text-purple-700 transition-all">
+                <i class="fas fa-briefcase"></i>
+                <span>Services</span>
+            </a>
+            {% if app.user %}
+                <a href="{{ path('app_favorites') }}" class="flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-medium text-gray-700 hover:bg-gradient-to-r hover:from-purple-50 hover:to-pink-50 hover:text-purple-700 transition-all relative">
+                    <i class="fas fa-heart text-red-500"></i>
+                    <span>Favorites</span>
+                    {% if favoriteCount is defined and favoriteCount > 0 %}
+                        <span class="absolute -top-1 -right-1 bg-gradient-to-r from-red-500 to-pink-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center font-bold shadow-lg">
+                            {{ favoriteCount }}
+                        </span>
+                    {% endif %}
+                </a>
+            {% endif %}
+            {% if is_granted('ROLE_HOST') %}
+                <div class="h-6 w-px bg-gray-300 mx-2"></div>
+                <a href="{{ path('host_logements') }}" class="flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-medium text-gray-700 hover:bg-gradient-to-r hover:from-blue-50 hover:to-cyan-50 hover:text-blue-700 transition-all">
+                    <i class="fas fa-building"></i>
+                    <span>My Properties</span>
+                </a>
+                <a href="{{ path('host_tools') }}" class="flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-medium text-gray-700 hover:bg-gradient-to-r hover:from-blue-50 hover:to-cyan-50 hover:text-blue-700 transition-all">
+                    <i class="fas fa-toolbox"></i>
+                    <span>My Tools</span>
+                </a>
+                <a href="{{ path('host_services') }}" class="flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-medium text-gray-700 hover:bg-gradient-to-r hover:from-blue-50 hover:to-cyan-50 hover:text-blue-700 transition-all">
+                    <i class="fas fa-tasks"></i>
+                    <span>My Services</span>
+                </a>
+            {% endif %}
+            {% if is_granted('ROLE_ADMIN') %}
+                <a href="{{ path('admin_services') }}" class="flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-bold bg-gradient-to-r from-indigo-500 to-purple-600 text-white hover:shadow-lg transition-all">
+                    <i class="fas fa-crown"></i>
+                    <span>Admin</span>
+                </a>
+            {% endif %}
+        </nav>
+
+        {# Right side actions #}
+        <div class="flex items-center gap-3">
+            {% if app.user %}
+                <div class="hidden md:flex items-center gap-3 px-4 py-2 rounded-2xl bg-gradient-to-r from-purple-50 to-pink-50 border border-purple-200">
+                    <div class="h-9 w-9 rounded-xl bg-gradient-to-br from-purple-600 to-pink-600 flex items-center justify-center text-sm font-bold text-white shadow-md">
+                        {{ app.user.name|default('U')|first|upper }}
+                    </div>
+                    <div class="flex flex-col">
+                        <span class="text-sm font-semibold text-gray-900">{{ app.user.name }}</span>
+                        <span class="text-xs text-gray-500">{{ app.user.email }}</span>
+                    </div>
+                </div>
+                <a href="{{ path('app_logout') }}" class="hidden md:flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-medium text-gray-700 hover:bg-gray-100 transition-all">
+                    <i class="fas fa-sign-out-alt"></i>
+                    <span>Logout</span>
+                </a>
+            {% else %}
+                <a href="{{ path('app_login') }}" class="flex items-center gap-2 px-6 py-3 rounded-xl bg-gradient-to-r from-purple-600 to-pink-600 text-white font-semibold hover:shadow-xl hover:scale-105 transition-all">
+                    <i class="fas fa-user"></i>
+                    <span>Sign In</span>
+                </a>
+            {% endif %}
+        </div>
+    </div>
+
+    {# Mobile Bottom Navigation #}
+    <nav class="lg:hidden fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 shadow-2xl z-50">
+        <div class="grid grid-cols-5 gap-1 px-2 py-3">
+            <a href="{{ path('app_home') }}" class="flex flex-col items-center gap-1 py-2 rounded-xl hover:bg-purple-50 transition-all">
+                <i class="fas fa-home text-xl text-purple-600"></i>
+                <span class="text-xs font-medium text-gray-700">Home</span>
+            </a>
+            <a href="{{ path('app_logements') }}" class="flex flex-col items-center gap-1 py-2 rounded-xl hover:bg-purple-50 transition-all">
+                <i class="fas fa-building text-xl text-gray-600"></i>
+                <span class="text-xs font-medium text-gray-700">Stays</span>
+            </a>
+            <a href="{{ path('app_tools') }}" class="flex flex-col items-center gap-1 py-2 rounded-xl hover:bg-purple-50 transition-all">
+                <i class="fas fa-tools text-xl text-gray-600"></i>
+                <span class="text-xs font-medium text-gray-700">Tools</span>
+            </a>
+            <a href="{{ path('app_services') }}" class="flex flex-col items-center gap-1 py-2 rounded-xl hover:bg-purple-50 transition-all">
+                <i class="fas fa-briefcase text-xl text-gray-600"></i>
+                <span class="text-xs font-medium text-gray-700">Services</span>
+            </a>
+            <a href="{% if app.user %}{{ path('app_favorites') }}{% else %}{{ path('app_login') }}{% endif %}" class="flex flex-col items-center gap-1 py-2 rounded-xl hover:bg-purple-50 transition-all relative">
+                {% if app.user %}
+                    <i class="fas fa-heart text-xl text-red-500"></i>
+                    <span class="text-xs font-medium text-gray-700">Favorites</span>
+                    {% if favoriteCount is defined and favoriteCount > 0 %}
+                        <span class="absolute top-0 right-2 bg-red-500 text-white text-xs rounded-full h-4 w-4 flex items-center justify-center font-bold">
+                            {{ favoriteCount }}
+                        </span>
+                    {% endif %}
+                {% else %}
+                    <i class="fas fa-user text-xl text-gray-600"></i>
+                    <span class="text-xs font-medium text-gray-700">Login</span>
+                {% endif %}
+            </a>
+        </div>
+    </nav>
+</header>

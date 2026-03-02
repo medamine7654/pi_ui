@@ -1,0 +1,498 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Discover Amazing Stays - RentAll{% endblock %}
+
+{% block body %}
+{# Hero Section #}
+<div class="bg-gradient-to-r from-blue-600 to-cyan-600 py-16 mb-8">
+    <div class="container mx-auto px-4 text-center">
+        <h1 class="text-5xl font-bold text-white mb-4 animate-fade-in">
+            Discover Amazing Stays
+        </h1>
+        <p class="text-xl text-white/90 mb-8">
+            Find your perfect accommodation from thousands of unique properties
+        </p>
+    </div>
+</div>
+
+<div class="container mx-auto px-4 pb-20">
+    {# Smart Search Bar #}
+    <div class="bg-white rounded-2xl shadow-xl border border-gray-100 p-4 mb-8 -mt-12 relative z-10">
+        {{ form_start(searchForm, {'attr': {'class': 'space-y-4', 'id': 'search-form'}}) }}
+            {# Quick Search Bar #}
+            <div class="flex flex-col md:flex-row gap-3">
+                <div class="flex-1">
+                    <div class="relative">
+                        <i class="fas fa-search absolute left-4 top-1/2 -translate-y-1/2 text-gray-400"></i>
+                        {{ form_widget(searchForm.query, {'attr': {'class': 'w-full pl-12 pr-4 py-4 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all text-lg', 'placeholder': 'Search properties...'}}) }}
+                    </div>
+                </div>
+                <button type="button" id="filter-toggle" class="md:w-auto px-6 py-4 bg-gradient-to-r from-purple-600 to-pink-600 text-white rounded-xl font-semibold hover:shadow-lg transition-all flex items-center justify-center gap-2 cursor-pointer">
+                    <i class="fas fa-sliders-h" id="filter-icon"></i>
+                    <span>Filters</span>
+                    <span id="active-filters-count" class="hidden bg-white text-purple-600 rounded-full w-6 h-6 flex items-center justify-center text-sm font-bold">0</span>
+                </button>
+                <button type="submit" class="md:w-auto px-8 py-4 bg-blue-600 text-white rounded-xl font-semibold hover:bg-blue-700 transition-all flex items-center justify-center gap-2">
+                    <i class="fas fa-search"></i>
+                    <span>Search</span>
+                </button>
+            </div>
+
+            {# Active Filters Chips #}
+            <div id="active-filters-chips" class="hidden flex-wrap gap-2">
+                {# Chips will be dynamically added here #}
+            </div>
+
+            {# Quick Clear All Button (shown when filters are active) #}
+            <div id="quick-clear-container" class="hidden">
+                <a href="{{ path('app_logements') }}" class="inline-flex items-center gap-2 px-4 py-2 bg-red-100 text-red-700 rounded-lg hover:bg-red-200 transition-all text-sm font-medium">
+                    <i class="fas fa-times-circle"></i>
+                    <span>Clear All Filters</span>
+                </a>
+            </div>
+
+            {# Collapsible Advanced Filters #}
+            <div id="advanced-filters" class="hidden space-y-6 pt-4 border-t border-gray-200">
+                {# Filter Sections #}
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    {# Category Filter #}
+                    <div class="space-y-3">
+                        <label class="flex items-center gap-2 text-sm font-bold text-gray-700 uppercase tracking-wide">
+                            <div class="w-8 h-8 rounded-lg bg-purple-100 flex items-center justify-center">
+                                <i class="fas fa-tag text-purple-600"></i>
+                            </div>
+                            <span>Category</span>
+                        </label>
+                        {{ form_widget(searchForm.category, {'attr': {'class': 'w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:ring-2 focus:ring-purple-500 focus:border-purple-500 transition-all bg-gray-50 hover:bg-white'}}) }}
+                    </div>
+
+                    {# Location Filter #}
+                    <div class="space-y-3">
+                        <label class="flex items-center gap-2 text-sm font-bold text-gray-700 uppercase tracking-wide">
+                            <div class="w-8 h-8 rounded-lg bg-red-100 flex items-center justify-center">
+                                <i class="fas fa-map-marker-alt text-red-600"></i>
+                            </div>
+                            <span>Location</span>
+                        </label>
+                        {{ form_widget(searchForm.location, {'attr': {'class': 'w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:ring-2 focus:ring-red-500 focus:border-red-500 transition-all bg-gray-50 hover:bg-white', 'placeholder': 'Enter city or area...'}}) }}
+                    </div>
+
+                    {# Sort By Filter #}
+                    <div class="space-y-3">
+                        <label class="flex items-center gap-2 text-sm font-bold text-gray-700 uppercase tracking-wide">
+                            <div class="w-8 h-8 rounded-lg bg-blue-100 flex items-center justify-center">
+                                <i class="fas fa-sort text-blue-600"></i>
+                            </div>
+                            <span>Sort By</span>
+                        </label>
+                        {{ form_widget(searchForm.sortBy, {'attr': {'class': 'w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all bg-gray-50 hover:bg-white'}}) }}
+                    </div>
+                </div>
+
+                {# Price Range with Visual Slider #}
+                <div class="space-y-4">
+                    <label class="flex items-center gap-2 text-sm font-bold text-gray-700 uppercase tracking-wide">
+                        <div class="w-8 h-8 rounded-lg bg-green-100 flex items-center justify-center">
+                            <i class="fas fa-euro-sign text-green-600"></i>
+                        </div>
+                        <span>Price Range (per night)</span>
+                    </label>
+                    <div class="grid grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-xs text-gray-600 mb-2">Minimum</label>
+                            {{ form_widget(searchForm.minPrice, {'attr': {'class': 'w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-all bg-gray-50 hover:bg-white', 'placeholder': '€0', 'type': 'number', 'min': '0'}}) }}
+                        </div>
+                        <div>
+                            <label class="block text-xs text-gray-600 mb-2">Maximum</label>
+                            {{ form_widget(searchForm.maxPrice, {'attr': {'class': 'w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-all bg-gray-50 hover:bg-white', 'placeholder': '€1000', 'type': 'number', 'min': '0'}}) }}
+                        </div>
+                    </div>
+                    <div id="price-range-display" class="text-center text-sm text-gray-600 font-medium"></div>
+                </div>
+
+                {# Action Buttons #}
+                <div class="flex gap-3 pt-4 border-t border-gray-200">
+                    <button type="submit" class="flex-1 px-6 py-3 bg-gradient-to-r from-blue-600 to-cyan-600 text-white rounded-xl font-semibold hover:shadow-lg transition-all flex items-center justify-center gap-2">
+                        <i class="fas fa-search"></i>
+                        <span>Apply Filters</span>
+                    </button>
+                    <button type="button" id="clear-filters" class="px-6 py-3 bg-gray-100 text-gray-700 rounded-xl font-semibold hover:bg-gray-200 transition-all flex items-center justify-center gap-2">
+                        <i class="fas fa-times"></i>
+                        <span>Clear All</span>
+                    </button>
+                </div>
+            </div>
+        {{ form_end(searchForm) }}
+    </div>
+
+    {# Results Header #}
+    <div class="flex items-center justify-between mb-6">
+        <div class="flex items-center gap-3">
+            <div class="text-lg font-semibold text-gray-900">
+                <i class="fas fa-home text-purple-600 mr-2"></i>
+                {{ pagination.getTotalItemCount }} {{ pagination.getTotalItemCount == 1 ? 'Property' : 'Properties' }}
+            </div>
+            {% if pagination.getTotalItemCount > 0 %}
+                <span class="text-sm text-gray-500">
+                    Page {{ pagination.currentPageNumber }} of {{ pagination.pageCount }}
+                </span>
+            {% endif %}
+        </div>
+    </div>
+
+    {# Logements Grid #}
+    <section>
+        {% if logementsWithScores|length > 0 %}
+            <div class="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+                {% for item in logementsWithScores %}
+                    {% set logement = item.logement %}
+                    {% set qualityScore = item.qualityScore %}
+                    <div class="group rounded-2xl border border-gray-200 bg-white shadow-sm hover:shadow-xl transition-all duration-300 overflow-hidden hover-lift">
+                        {# Image with Overlay #}
+                        <div class="relative overflow-hidden">
+                            {% if logement.imageName %}
+                                <img src="{{ asset('uploads/logements/' ~ logement.imageName) }}" 
+                                     alt="{{ logement.name }}" 
+                                     class="w-full h-56 object-cover group-hover:scale-110 transition-transform duration-300">
+                            {% else %}
+                                <div class="w-full h-56 bg-gradient-to-br from-purple-100 to-purple-200 flex items-center justify-center group-hover:from-purple-200 group-hover:to-purple-300 transition-all">
+                                    <i class="fas fa-home text-purple-400 text-6xl"></i>
+                                </div>
+                            {% endif %}
+                            
+                            {# Badges Overlay #}
+                            <div class="absolute top-3 left-3 right-3 flex items-start justify-between">
+                                {% if logement.category %}
+                                    <span class="inline-flex items-center px-3 py-1.5 rounded-full text-xs font-bold bg-white/90 backdrop-blur-sm text-gray-900 shadow-lg">
+                                        <i class="{{ logement.category.icon }} mr-1.5"></i>
+                                        {{ logement.category.name }}
+                                    </span>
+                                {% endif %}
+                                <span class="inline-flex items-center px-3 py-1.5 rounded-full text-xs font-bold {{ qualityScore.rating.bgClass }} {{ qualityScore.rating.textClass }} shadow-lg">
+                                    <i class="fas {{ qualityScore.rating.icon }} mr-1.5"></i>
+                                    {{ qualityScore.percentage }}%
+                                </span>
+                            </div>
+
+                            {# Favorite Button #}
+                            {% if app.user %}
+                                <form method="post" action="{{ path('app_favorites_toggle', {type: 'logement', id: logement.id}) }}" class="absolute top-3 right-3">
+                                    <button type="submit" class="w-10 h-10 rounded-full {{ item.isFavorite ? 'bg-red-500 text-white' : 'bg-white/90 backdrop-blur-sm text-gray-700' }} shadow-lg hover:scale-110 transition-all flex items-center justify-center">
+                                        <i class="fas fa-heart"></i>
+                                    </button>
+                                </form>
+                            {% endif %}
+                        </div>
+                        
+                        <div class="p-5 space-y-3">
+                            {# Title and Location #}
+                            <div>
+                                <h3 class="font-bold text-lg text-gray-900 mb-1 line-clamp-1 group-hover:text-purple-600 transition-colors">
+                                    {{ logement.name }}
+                                </h3>
+                                <p class="text-sm text-gray-500 flex items-center gap-1">
+                                    <i class="fas fa-map-marker-alt text-red-500"></i>
+                                    {{ logement.fullLocation }}
+                                </p>
+                            </div>
+
+                            {# Property Features #}
+                            {% if logement.numberOfRooms or logement.numberOfBeds or logement.maxGuests %}
+                                <div class="flex gap-4 text-sm text-gray-600">
+                                    {% if logement.numberOfRooms %}
+                                        <span class="flex items-center gap-1">
+                                            <i class="fas fa-door-open text-purple-500"></i>
+                                            {{ logement.numberOfRooms }}
+                                        </span>
+                                    {% endif %}
+                                    {% if logement.numberOfBeds %}
+                                        <span class="flex items-center gap-1">
+                                            <i class="fas fa-bed text-blue-500"></i>
+                                            {{ logement.numberOfBeds }}
+                                        </span>
+                                    {% endif %}
+                                    {% if logement.maxGuests %}
+                                        <span class="flex items-center gap-1">
+                                            <i class="fas fa-users text-green-500"></i>
+                                            {{ logement.maxGuests }}
+                                        </span>
+                                    {% endif %}
+                                </div>
+                            {% endif %}
+
+                            {# Price and CTA #}
+                            <div class="flex items-center justify-between pt-3 border-t border-gray-100">
+                                <div>
+                                    <span class="text-2xl font-bold text-gray-900">€{{ logement.pricePerNight }}</span>
+                                    <span class="text-sm text-gray-500">/night</span>
+                                </div>
+                                <a href="{{ path('app_logement_show', {id: logement.id}) }}" 
+                                   class="px-4 py-2 bg-gradient-to-r from-purple-600 to-pink-600 text-white rounded-lg font-semibold hover:shadow-lg transition-all text-sm">
+                                    View
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
+
+            {# Pagination #}
+            {% if pagination.getTotalItemCount > 12 %}
+                <div class="mt-12 flex justify-center">
+                    <nav class="inline-flex rounded-xl shadow-lg overflow-hidden border border-gray-200" aria-label="Pagination">
+                        {% if pagination.currentPageNumber > 1 %}
+                            <a href="{{ path('app_logements', app.request.query.all|merge({'page': pagination.currentPageNumber - 1})) }}" 
+                               class="px-4 py-3 bg-white text-gray-700 hover:bg-gray-50 font-medium transition-colors flex items-center gap-2">
+                                <i class="fas fa-chevron-left"></i>
+                                <span class="hidden sm:inline">Previous</span>
+                            </a>
+                        {% endif %}
+
+                        {% set startPage = max(1, pagination.currentPageNumber - 2) %}
+                        {% set endPage = min(pagination.pageCount, pagination.currentPageNumber + 2) %}
+                        
+                        {% for page in startPage..endPage %}
+                            {% if page == pagination.currentPageNumber %}
+                                <span class="px-5 py-3 bg-gradient-to-r from-purple-600 to-pink-600 text-white font-bold">
+                                    {{ page }}
+                                </span>
+                            {% else %}
+                                <a href="{{ path('app_logements', app.request.query.all|merge({'page': page})) }}" 
+                                   class="px-5 py-3 bg-white text-gray-700 hover:bg-gray-50 font-medium transition-colors">
+                                    {{ page }}
+                                </a>
+                            {% endif %}
+                        {% endfor %}
+
+                        {% if pagination.currentPageNumber < pagination.pageCount %}
+                            <a href="{{ path('app_logements', app.request.query.all|merge({'page': pagination.currentPageNumber + 1})) }}" 
+                               class="px-4 py-3 bg-white text-gray-700 hover:bg-gray-50 font-medium transition-colors flex items-center gap-2">
+                                <span class="hidden sm:inline">Next</span>
+                                <i class="fas fa-chevron-right"></i>
+                            </a>
+                        {% endif %}
+                    </nav>
+                </div>
+            {% endif %}
+        {% else %}
+            {# Empty State #}
+            <div class="flex flex-col items-center justify-center py-20 text-center">
+                <div class="w-24 h-24 rounded-full bg-gradient-to-br from-purple-100 to-pink-100 flex items-center justify-center mb-6">
+                    <i class="fas fa-search text-4xl text-purple-400"></i>
+                </div>
+                <h3 class="text-2xl font-bold text-gray-900 mb-2">No Properties Found</h3>
+                <p class="text-gray-600 mb-6 max-w-md">
+                    We couldn't find any properties matching your criteria. Try adjusting your filters or search terms.
+                </p>
+                <button type="button" id="clear-filters-empty" class="px-6 py-3 bg-gradient-to-r from-purple-600 to-pink-600 text-white rounded-xl font-semibold hover:shadow-lg transition-all">
+                    Clear All Filters
+                </button>
+            </div>
+        {% endif %}
+    </section>
+</div>
+
+{% endblock %}
+
+{% block javascripts %}
+    {{ parent() }}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const filterToggle = document.getElementById('filter-toggle');
+    const advancedFilters = document.getElementById('advanced-filters');
+    const clearFiltersBtn = document.getElementById('clear-filters');
+    const clearFiltersEmptyBtn = document.getElementById('clear-filters-empty');
+    const activeFiltersCount = document.getElementById('active-filters-count');
+    const activeFiltersChips = document.getElementById('active-filters-chips');
+    const quickClearContainer = document.getElementById('quick-clear-container');
+    const form = document.getElementById('search-form');
+    
+    // Toggle advanced filters
+    if (filterToggle && advancedFilters) {
+        console.log('Filter toggle initialized');
+        
+        // Use onclick instead of addEventListener for better compatibility
+        filterToggle.onclick = function(e) {
+            e.preventDefault();
+            e.stopPropagation();
+            console.log('Filter toggle clicked');
+            
+            const isHidden = advancedFilters.classList.contains('hidden');
+            
+            if (isHidden) {
+                advancedFilters.classList.remove('hidden');
+            } else {
+                advancedFilters.classList.add('hidden');
+            }
+            
+            const icon = document.getElementById('filter-icon');
+            if (icon) {
+                if (isHidden) {
+                    // Opening filters
+                    icon.classList.remove('fa-sliders-h');
+                    icon.classList.add('fa-times');
+                } else {
+                    // Closing filters
+                    icon.classList.remove('fa-times');
+                    icon.classList.add('fa-sliders-h');
+                }
+            }
+            
+            return false;
+        };
+    } else {
+        console.error('Filter toggle or advanced filters not found');
+    }
+    
+    // Update active filters count and chips
+    function updateActiveFilters() {
+        if (!form) return;
+        
+        const formData = new FormData(form);
+        let count = 0;
+        const chips = [];
+        
+        // Check each filter
+        const query = formData.get('search_filter[query]');
+        const category = formData.get('search_filter[category]');
+        const location = formData.get('search_filter[location]');
+        const minPrice = formData.get('search_filter[minPrice]');
+        const maxPrice = formData.get('search_filter[maxPrice]');
+        
+        if (query && query.trim() !== '') {
+            count++;
+            chips.push({label: `"${query}"`, field: 'query', value: query});
+        }
+        if (category && category !== '') {
+            count++;
+            const categorySelect = form.querySelector('[name="search_filter[category]"]');
+            if (categorySelect && categorySelect.selectedIndex > 0) {
+                const categoryText = categorySelect.options[categorySelect.selectedIndex].text;
+                chips.push({label: categoryText, field: 'category', value: category});
+            }
+        }
+        if (location && location.trim() !== '') {
+            count++;
+            chips.push({label: `📍 ${location}`, field: 'location', value: location});
+        }
+        if (minPrice && minPrice !== '') {
+            count++;
+            chips.push({label: `Min: €${minPrice}`, field: 'minPrice', value: minPrice});
+        }
+        if (maxPrice && maxPrice !== '') {
+            count++;
+            chips.push({label: `Max: €${maxPrice}`, field: 'maxPrice', value: maxPrice});
+        }
+        
+        // Update count badge
+        if (activeFiltersCount) {
+            if (count > 0) {
+                activeFiltersCount.textContent = count;
+                activeFiltersCount.classList.remove('hidden');
+                activeFiltersCount.classList.add('flex');
+            } else {
+                activeFiltersCount.classList.add('hidden');
+                activeFiltersCount.classList.remove('flex');
+            }
+        }
+        
+        // Update chips
+        if (activeFiltersChips) {
+            if (chips.length > 0) {
+                activeFiltersChips.classList.remove('hidden');
+                activeFiltersChips.classList.add('flex');
+                activeFiltersChips.innerHTML = chips.map(chip => `
+                    <span class="inline-flex items-center gap-2 px-3 py-2 bg-purple-100 text-purple-800 rounded-full text-sm font-semibold shadow-sm">
+                        <span>${chip.label}</span>
+                        <button type="button" class="hover:text-purple-900 hover:bg-purple-200 rounded-full w-5 h-5 flex items-center justify-center transition-all" onclick="removeFilter('${chip.field}')">
+                            <i class="fas fa-times text-xs"></i>
+                        </button>
+                    </span>
+                `).join('');
+            } else {
+                activeFiltersChips.classList.add('hidden');
+                activeFiltersChips.classList.remove('flex');
+            }
+        }
+        
+        // Show/hide quick clear button
+        if (quickClearContainer) {
+            if (count > 0) {
+                quickClearContainer.classList.remove('hidden');
+            } else {
+                quickClearContainer.classList.add('hidden');
+            }
+        }
+    }
+    
+    // Remove specific filter
+    window.removeFilter = function(field) {
+        console.log('Removing filter:', field);
+        
+        // Build URL without the specific filter
+        const currentUrl = new URL(window.location.href);
+        const params = new URLSearchParams(currentUrl.search);
+        
+        // Remove the specific parameter
+        if (field === 'query') {
+            params.delete('search_filter[query]');
+        } else if (field === 'category') {
+            params.delete('search_filter[category]');
+        } else if (field === 'location') {
+            params.delete('search_filter[location]');
+        } else if (field === 'minPrice') {
+            params.delete('search_filter[minPrice]');
+        } else if (field === 'maxPrice') {
+            params.delete('search_filter[maxPrice]');
+        }
+        
+        // Redirect to URL without the filter
+        const newUrl = currentUrl.pathname + (params.toString() ? '?' + params.toString() : '');
+        window.location.href = newUrl;
+    };
+    
+    // Clear all filters
+    function clearAllFilters(e) {
+        if (e) {
+            e.preventDefault();
+        }
+        window.location.href = '{{ path('app_logements') }}';
+    }
+    
+    if (clearFiltersBtn) {
+        clearFiltersBtn.onclick = clearAllFilters;
+    }
+    if (clearFiltersEmptyBtn) {
+        clearFiltersEmptyBtn.onclick = clearAllFilters;
+    }
+    
+    // Update price range display
+    const minPriceInput = form ? form.querySelector('[name="search_filter[minPrice]"]') : null;
+    const maxPriceInput = form ? form.querySelector('[name="search_filter[maxPrice]"]') : null;
+    const priceRangeDisplay = document.getElementById('price-range-display');
+    
+    function updatePriceDisplay() {
+        if (!minPriceInput || !maxPriceInput || !priceRangeDisplay) return;
+        const min = minPriceInput.value || '0';
+        const max = maxPriceInput.value || '∞';
+        priceRangeDisplay.textContent = `€${min} - €${max}`;
+    }
+    
+    if (minPriceInput && maxPriceInput) {
+        minPriceInput.addEventListener('input', updatePriceDisplay);
+        maxPriceInput.addEventListener('input', updatePriceDisplay);
+        updatePriceDisplay();
+    }
+    
+    // Initialize
+    updateActiveFilters();
+    
+    // Update on form change
+    if (form) {
+        form.addEventListener('change', updateActiveFilters);
+    }
+    
+    console.log('Filter system initialized');
+});
+</script>
+{% endblock %}
